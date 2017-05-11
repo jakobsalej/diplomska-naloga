@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Diplomska naloga</string>
+    <string name="button_get_document">Get document</string>
+    <string name="textview_qr_data">Waiting for QR data...</string>
+    <string name="button_scan_code">Scan QR code</string>
+    <string name="button_show_map">Show Map</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="button_show_graph">Show Graph</string>
+</resources>

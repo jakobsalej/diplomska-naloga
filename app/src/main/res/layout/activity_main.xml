@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.jakob.qrreader.MainActivity">
+
+    <Button
+        android:id="@+id/scan_code"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_scan_code"
+        android:onClick="scanCode"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:id="@+id/show_map"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_show_map"
+        android:onClick="openMap"
+        android:layout_below="@+id/show_graph"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:id="@+id/show_graph"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_show_graph"
+        android:layout_below="@+id/scan_code"
+        android:onClick="showGraph"
+        android:layout_centerHorizontal="true" />
+
+</RelativeLayout>
