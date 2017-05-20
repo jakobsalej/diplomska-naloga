@@ -20,7 +20,7 @@ public class DisplayDataActivity extends AppCompatActivity {
 
     ProgressDialog pd;
     TextView documentName;
-    String BASE_URL = "http://localhost:3000/api/documents/";
+    String BASE_URL = "https://diploma-server-rest.herokuapp.com/api/documents/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,9 +33,9 @@ public class DisplayDataActivity extends AppCompatActivity {
 
         // Capture the layout's TextView and set the string as its text
         documentName = (TextView) findViewById(R.id.textview_document_name);
-        documentName.setText(data);
+        //documentName.setText("Getting data...");
 
-        //new JsonTask().execute(BASE_URL + data);
+        new GetDataFromDB().execute(BASE_URL + data);
     }
 
 
@@ -46,14 +46,14 @@ public class DisplayDataActivity extends AppCompatActivity {
 
 
 
-
-    private class JsonTask extends AsyncTask<String, String, String> {
+    // TODO: optimize this (third party library? Volley, Retrofit)
+    private class GetDataFromDB extends AsyncTask<String, String, String> {
 
         protected void onPreExecute() {
             super.onPreExecute();
 
             pd = new ProgressDialog(DisplayDataActivity.this);
-            pd.setMessage("Please wait");
+            pd.setMessage("Loading data...");
             pd.setCancelable(false);
             pd.show();
         }
@@ -112,6 +112,8 @@ public class DisplayDataActivity extends AppCompatActivity {
                 pd.dismiss();
             }
             documentName.setText(result);
+
+            // TODO: parse JSON and display data
         }
     }
 }
