@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
@@ -16,11 +17,14 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import static com.example.jakob.qrreader.ReadQRActivity.DB_DATA;
+
 public class DisplayDataActivity extends AppCompatActivity {
 
     ProgressDialog pd;
     TextView documentName;
     String BASE_URL = "https://diploma-server-rest.herokuapp.com/api/documents/";
+    String data;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +33,7 @@ public class DisplayDataActivity extends AppCompatActivity {
 
         // Get the Intent that started this activity and extract the string
         Intent intent = getIntent();
-        String data = intent.getStringExtra(ReadQRActivity.DB_DATA);
+        String data = intent.getStringExtra(DB_DATA);
 
         // Capture the layout's TextView and set the string as its text
         documentName = (TextView) findViewById(R.id.textview_document_name);
@@ -79,7 +83,7 @@ public class DisplayDataActivity extends AppCompatActivity {
 
                 while ((line = reader.readLine()) != null) {
                     buffer.append(line+"\n");
-                    Log.d("Response: ", "> " + line);   //here u ll get whole response...... :-)
+                    Log.d("Response: ", "> " + line);
 
                 }
 
@@ -112,9 +116,18 @@ public class DisplayDataActivity extends AppCompatActivity {
                 pd.dismiss();
             }
             documentName.setText(result);
+            data = result;
 
             // TODO: parse JSON and display data
         }
+    }
+
+
+    public void startMonitoring(View view) {
+        Intent intent = new Intent(this, MonitoringActivity.class);
+
+        intent.putExtra(DB_DATA, data);
+        startActivity(intent);
     }
 }
 

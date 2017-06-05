@@ -6,4 +6,9 @@
     <string name="button_show_map">Show Map</string>
     <string name="title_activity_maps">Map</string>
     <string name="button_show_graph">Show Graph</string>
+    <string name="button_start">Start!</string>
+    <string name="title_activity_monitoring">monitoringActivity</string>
+    <string name="subtitle_card_general">General info</string>
+    <string name="textview_status">Status:</string>
+    <string name="textview_time_running">Time running:</string>
 </resources>
