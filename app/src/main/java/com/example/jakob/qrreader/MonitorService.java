@@ -11,6 +11,12 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -24,6 +30,7 @@ import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStates;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -46,6 +53,9 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
     public LocationRequest mLocationRequest;
     public String mLastUpdateTime;
     public int locationInterval;
+    private RequestQueue reQueue;
+    String weatherAppID = "126cb0f7fc8884208c5178d70cac7bea";
+    private JSONArray dataJSON = new JSONArray();
 
 
     public MonitorService() {
@@ -55,6 +65,7 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
     @Override
     protected void onHandleIntent(Intent workIntent) {
         // Gets data from the incoming Intent
+        Log.v(TAG, "Incoming intent!");
         String data = workIntent.getStringExtra("data");
         int timeDelta = workIntent.getIntExtra("timeDelta", 120);
 
@@ -79,38 +90,8 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
 
         Log.v(TAG, "Service will enter infinite loop now.");
 
-
-        //int count = 0;
-        //while (true) {
-
-            /*
-            count++;
-            //Log.v(TAG, "Loop" + count);
-            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return;
-            }
-
-            mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-            if (mLastLocation != null) {
-                Log.v(TAG, "Getting location " + mLastLocation);
-            }
-
-            try {
-                TimeUnit.SECONDS.sleep(5);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            */
-        //}
-
+        while(true) {
+        }
 
 
     }
@@ -121,7 +102,7 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
     @Override
     public void onCreate() {
         super.onCreate();
-        // last known location == current location
+
         // Create an instance of GoogleAPIClient.
         Log.v(TAG, "On create");
 
@@ -176,8 +157,8 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
     // continous location updates
     protected void createLocationRequest() {
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(10000);    // TODO: set from 'location interval'
-        mLocationRequest.setFastestInterval(5000);
+        mLocationRequest.setInterval(20000);    // TODO: set from 'location interval'
+        mLocationRequest.setFastestInterval(10000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         // add location request
@@ -222,13 +203,74 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
         mLastLocation = location;
         mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
         Log.v(TAG, "Getting new location!" + String.valueOf(location) + " " + mLastUpdateTime);
-        // TODO: get weather data
+
+        // getting weather data
+        getWeatherData(mLastLocation, mLastUpdateTime);
     }
+
+
+
+    public void getWeatherData(final Location location, final String updateTime) {
+
+        // get coordinates
+        double lat = Double.parseDouble(String.valueOf(location.getLatitude()));
+        double lng = Double.parseDouble(String.valueOf(location.getLongitude()));
+
+        // Instantiate the RequestQueue.
+        reQueue = Volley.newRequestQueue(this);
+
+        // build url
+        String url ="http://api.openweathermap.org/data/2.5/weather?lat=" + lat + "&lon=" + lng + "&APPID=" + weatherAppID;
+
+        // Request a string response from the provided URL.
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Log.v(TAG, "Weather response is: "+ response);
+
+                        // once we get weather data, add it to JSON
+                        addDataToJSON(response, location, updateTime);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.v(TAG, "That didn't work!");
+                // TODO: if no weather data is available, save entry without it
+            }
+        });
+
+        // Add the request to the RequestQueue.
+        reQueue.add(stringRequest);
+    }
+
+    private void addDataToJSON(String weatherData, Location locationData, String updateTime) {
+        // new JSON object
+        JSONObject dataObj = new JSONObject();
+        try {
+            dataObj.put("time", mLastUpdateTime);
+            dataObj.put("location", mLastLocation);
+            dataObj.put("weather", weatherData);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        Log.v(TAG, "Adding JSON object to array: " + String.valueOf(dataObj));
+
+        // add new data to array
+        dataJSON.put(dataObj);
+        //Log.v(TAG, String.valueOf(dataJSON));
+        Log.v(TAG, "Array length: " +  dataJSON.length());
+    }
+
 
 
     @Override
     public void onDestroy() {
-        Log.v(TAG, "Stopping service!");
         super.onDestroy();
+        Log.v(TAG, "Stopping service!");
+        mGoogleApiClient.disconnect();
     }
+
 }
+

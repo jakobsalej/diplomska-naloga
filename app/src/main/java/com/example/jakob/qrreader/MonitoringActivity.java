@@ -1,6 +1,7 @@
 package com.example.jakob.qrreader;
 
-import android.app.IntentService;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -8,14 +9,15 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -37,11 +39,8 @@ import com.google.android.gms.location.LocationSettingsStatusCodes;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.sql.Date;
-import java.sql.Time;
 import java.text.DateFormat;
 
-import static android.R.attr.data;
 import static com.example.jakob.qrreader.ReadQRActivity.DB_DATA;
 
 public class MonitoringActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
@@ -54,6 +53,7 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
     public DateFormat mLastUpdateTime;
     public int locationInterval;
     public int status = 0;
+    private int notificationId = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,15 +72,17 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
         final int timeDelta = locationInterval;
 
         // parse JSON
-        try {
-            JSONObject obj = new JSONObject(data);
+        if(data != null && data.length() > 0) {
+            try {
+                JSONObject obj = new JSONObject(data);
 
-            // set toolbar title
-            String title = obj.getString("title");
-            getSupportActionBar().setTitle(title);
+                // set toolbar title
+                String title = obj.getString("title");
+                getSupportActionBar().setTitle(title);
 
-        } catch (JSONException e) {
-            e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
 
 
@@ -94,10 +96,12 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
                 if (status == 0) {
                     startMonitoring(i, data, timeDelta);
                     status = 1;
+                    showNotification();
                     Snackbar.make(view, "Monitor activity started!", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
                 } else {
-                    stopService(i);     // TODO: does not work :(
+                    stopService(i);
+                    cancelNotification(getApplicationContext(), notificationId);
                     status = 0;
                     Snackbar.make(view, "Monitor activity stopped!", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
@@ -170,6 +174,15 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
         startService(i);
     }
 
+
+    private void stopMonitoring(Intent i) {
+        Log.v(TAG, "Stopping service from activity!!");
+        final Intent in = new Intent(this, MonitorService.class);
+        in.putExtra("status", false);
+        startService(in);
+    }
+
+
     @Override
     public void onConnected(Bundle connectionHint) {
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -185,12 +198,13 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                 mGoogleApiClient);
         if (mLastLocation != null) {
+            Log.v(TAG, "Getting first location!");
             Log.v(TAG, "Latitude: " + String.valueOf(mLastLocation.getLatitude()));
             Log.v(TAG, "Longitude: " + String.valueOf(mLastLocation.getLongitude()));
         }
 
         // get continous location updates
-        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        // LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
     }
 
 
@@ -265,6 +279,46 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
         mLastLocation = location;
         Log.v(TAG, "Getting new location!" + String.valueOf(location));
         //mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
+    }
+
+
+
+    public void showNotification() {
+        NotificationCompat.Builder mBuilder =
+                (NotificationCompat.Builder) new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.drawable.cast_ic_notification_small_icon)
+                        .setContentTitle("My notification")
+                        .setContentText("Hello World!")
+                        .setOngoing(true);
+        // Creates an explicit intent for an Activity in your app
+        Intent resultIntent = new Intent(this, MonitoringActivity.class);
+
+        // The stack builder object will contain an artificial back stack for the
+        // started Activity.
+        // This ensures that navigating backward from the Activity leads out of
+        // your application to the Home screen.
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        // Adds the back stack for the Intent (but not the Intent itself)
+        stackBuilder.addParentStack(MonitoringActivity.class);
+        // Adds the Intent that starts the Activity to the top of the stack
+        stackBuilder.addNextIntent(resultIntent);
+        PendingIntent resultPendingIntent =
+                stackBuilder.getPendingIntent(
+                        0,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+        mBuilder.setContentIntent(resultPendingIntent);
+        NotificationManager mNotificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        // notificationId allows you to update the notification later on.
+        mNotificationManager.notify(notificationId, mBuilder.build());
+    }
+
+
+    public static void cancelNotification(Context ctx, int notifyId) {
+        String ns = Context.NOTIFICATION_SERVICE;
+        NotificationManager nMgr = (NotificationManager) ctx.getSystemService(ns);
+        nMgr.cancel(notifyId);
     }
 }
 
