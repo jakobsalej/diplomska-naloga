@@ -7,8 +7,18 @@
     <string name="title_activity_maps">Map</string>
     <string name="button_show_graph">Show Graph</string>
     <string name="button_start">Start!</string>
+    <string name="button_open_maps">Navigate</string>
     <string name="title_activity_monitoring">monitoringActivity</string>
     <string name="subtitle_card_general">General info</string>
+    <string name="subtitle_card_latest_data">Last measurements</string>
     <string name="textview_status">Status:</string>
+    <string name="textview_status_default_value">Not available</string>
     <string name="textview_time_running">Time running:</string>
+    <string name="textview_time_running_value">Not available</string>
+    <string name="textview_time_latest">Time:</string>
+    <string name="textview_temp">Temperature:</string>
+    <string name="textview_humidity">Humidity:</string>
+    <string name="textview_coord_x">Lat:</string>
+    <string name="textview_coord_y">Lon:</string>
+
 </resources>

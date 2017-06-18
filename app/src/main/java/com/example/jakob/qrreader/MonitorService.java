@@ -37,6 +37,8 @@ import org.json.JSONObject;
 import java.text.DateFormat;
 import java.util.Date;
 
+import static android.R.attr.data;
+
 
 /**
  * Created by jakob on 6/5/17.
@@ -54,8 +56,14 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
     public String mLastUpdateTime;
     public int locationInterval;
     private RequestQueue reQueue;
-    String weatherAppID = "126cb0f7fc8884208c5178d70cac7bea";
+    private String weatherAppID = "126cb0f7fc8884208c5178d70cac7bea";
     private JSONArray dataJSON = new JSONArray();
+    public static boolean serviceRunning = false;
+    public static String lastTime;
+    public static String temp;
+    public static String humidity;
+    public static int lat;
+    public static int lon;
 
 
     public MonitorService() {
@@ -64,8 +72,29 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
 
     @Override
     protected void onHandleIntent(Intent workIntent) {
+
+        serviceRunning = true;
+
         // Gets data from the incoming Intent
         Log.v(TAG, "Incoming intent!");
+
+
+        // get MODE
+        int mode = workIntent.getIntExtra("mode", 0);
+
+        if (mode == 0) {
+            // start service
+            connectToGoogleApiClient();
+        } else if (mode == 1) {
+            // return available data immediately
+            Log.v(TAG, "Will return data!");
+            // sending result back to activity
+            Intent i = new Intent(ACTION);
+            i.putExtra("status", serviceRunning);
+            LocalBroadcastManager.getInstance(this).sendBroadcast(i);
+        }
+
+
         String data = workIntent.getStringExtra("data");
         int timeDelta = workIntent.getIntExtra("timeDelta", 120);
 
@@ -82,11 +111,7 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
         }
 
 
-        // sending result back to activity
-        Intent i = new Intent(ACTION);
-        i.putExtra("status", status);
 
-        LocalBroadcastManager.getInstance(this).sendBroadcast(i);
 
         Log.v(TAG, "Service will enter infinite loop now.");
 
@@ -102,10 +127,15 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
     @Override
     public void onCreate() {
         super.onCreate();
+        Log.v(TAG, "On create");
+    }
+
+
+    private void connectToGoogleApiClient() {
+
+        serviceRunning = true;
 
         // Create an instance of GoogleAPIClient.
-        Log.v(TAG, "On create");
-
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
                     .addConnectionCallbacks(this)
@@ -270,6 +300,7 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
         super.onDestroy();
         Log.v(TAG, "Stopping service!");
         mGoogleApiClient.disconnect();
+        serviceRunning = false;
     }
 
 }

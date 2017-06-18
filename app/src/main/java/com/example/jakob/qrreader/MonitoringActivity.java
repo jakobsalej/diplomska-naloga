@@ -21,6 +21,7 @@ import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -35,15 +36,26 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStates;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMapOptions;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.DateFormat;
+import java.util.Map;
 
+import static android.R.attr.colorPrimary;
+import static android.R.attr.data;
+import static com.example.jakob.qrreader.R.id.map;
 import static com.example.jakob.qrreader.ReadQRActivity.DB_DATA;
 
-public class MonitoringActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+public class MonitoringActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, OnMapReadyCallback {
 
     private static final String TAG = "MonitoringActivity";
     private static final int REQUEST_CHECK_SETTINGS = 1000;
@@ -52,8 +64,11 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
     public LocationRequest mLocationRequest;
     public DateFormat mLastUpdateTime;
     public int locationInterval;
-    public int status = 0;
+    public boolean serviceRunning = false;
     private int notificationId = 0;
+    private TextView status;
+    private MapView mapView;
+    private GoogleMap map;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +78,7 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
         setSupportActionBar(toolbar);
 
         // Get the Intent that started this activity and extract the string
+        Log.v(TAG, "On create!");
         Intent intent = getIntent();
         final String data = intent.getStringExtra(DB_DATA);
 
@@ -72,7 +88,7 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
         final int timeDelta = locationInterval;
 
         // parse JSON
-        if(data != null && data.length() > 0) {
+        if (data != null && data.length() > 0) {
             try {
                 JSONObject obj = new JSONObject(data);
 
@@ -85,24 +101,36 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
             }
         }
 
+        // MAP
+        GoogleMapOptions options = new GoogleMapOptions();
+        options.ambientEnabled(true)
+                .scrollGesturesEnabled(true);
+
+        mapView = (MapView) findViewById(R.id.mapView);
+        mapView.onCreate(null);
+        mapView.getMapAsync(this);
+
 
         // new service intent
         final Intent i = new Intent(this, MonitorService.class);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setImageResource(R.drawable.ic_media_play);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (status == 0) {
-                    startMonitoring(i, data, timeDelta);
-                    status = 1;
+                if (!serviceRunning) {
+                    startMonitoring(i, 0, data, timeDelta);
+                    serviceRunning = true;
+                    status.setText("Running");
                     showNotification();
                     Snackbar.make(view, "Monitor activity started!", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
                 } else {
                     stopService(i);
                     cancelNotification(getApplicationContext(), notificationId);
-                    status = 0;
+                    serviceRunning = false;
+                    status.setText("Not Running");
                     Snackbar.make(view, "Monitor activity stopped!", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
                 }
@@ -127,32 +155,73 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
 
 
     protected void onStart() {
+        super.onStart();
         mGoogleApiClient.connect();
         createLocationRequest();
-        super.onStart();
+        mapView.onStart();
     }
 
 
     protected void onStop() {
-        mGoogleApiClient.disconnect();
         super.onStop();
+        mGoogleApiClient.disconnect();
+        mapView.onStop();
     }
 
 
     @Override
     protected void onResume() {
         super.onResume();
+        mapView.onResume();
+
+        Log.v(TAG, "On resume!!");
 
         // Register for the particular broadcast based on ACTION string
         IntentFilter ifilter = new IntentFilter(MonitorService.ACTION);
         LocalBroadcastManager.getInstance(this).registerReceiver(monitorReceiver, ifilter);
+
+        // get info if background service is running
+        //requestDataUpdate();
+
+        serviceRunning = MonitorService.serviceRunning;
+
+        // set latest data to view
+        status = (TextView) findViewById(R.id.textView_status_value);
+        if (serviceRunning) {
+            status.setText("Running");
+        } else {
+            status.setText("Not running");
+        }
     }
+
 
     @Override
     protected void onPause() {
         super.onPause();
+        mapView.onPause();
         // Unregister the listener when the application is paused
         LocalBroadcastManager.getInstance(this).unregisterReceiver(monitorReceiver);
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mapView.onDestroy();
+    }
+
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mapView.onLowMemory();
+    }
+
+
+    private void requestDataUpdate() {
+        // new service intent
+        final Intent i = new Intent(this, MonitorService.class);
+        startMonitoring(i, 1, "{data}", 10);
     }
 
 
@@ -160,15 +229,17 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
     private BroadcastReceiver monitorReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String status = intent.getStringExtra("status");
-            Toast.makeText(MonitoringActivity.this, status, Toast.LENGTH_SHORT).show();
-
+            serviceRunning = intent.getBooleanExtra("status", false);
+            //Toast.makeText(MonitoringActivity.this, status, Toast.LENGTH_SHORT).show();
+            Log.v(TAG, "Service running: " + serviceRunning);
         }
     };
 
 
     // start backgroud service and send it json
-    public void startMonitoring(Intent i, String data, int timeDelta) {
+    // MODE: 0 = start service, 1 = send update to the activity
+    public void startMonitoring(Intent i, int mode, String data, int timeDelta) {
+        i.putExtra("mode", mode);
         i.putExtra("data", data);
         i.putExtra("timeDelta", timeDelta);
         startService(i);
@@ -201,6 +272,18 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
             Log.v(TAG, "Getting first location!");
             Log.v(TAG, "Latitude: " + String.valueOf(mLastLocation.getLatitude()));
             Log.v(TAG, "Longitude: " + String.valueOf(mLastLocation.getLongitude()));
+
+            // add phone location to map
+            // TODO: also add markers and set zoom
+            if (map != null) {
+                Log.v(TAG, "Setting current location");
+                map.setMyLocationEnabled(true);
+                map.getUiSettings().setMyLocationButtonEnabled(true);
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                        new LatLng(mLastLocation.getLatitude(),
+                                mLastLocation.getLongitude()), 7));
+
+            }
         }
 
         // get continous location updates
@@ -282,7 +365,6 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
     }
 
 
-
     public void showNotification() {
         NotificationCompat.Builder mBuilder =
                 (NotificationCompat.Builder) new NotificationCompat.Builder(this)
@@ -319,6 +401,16 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
         String ns = Context.NOTIFICATION_SERVICE;
         NotificationManager nMgr = (NotificationManager) ctx.getSystemService(ns);
         nMgr.cancel(notifyId);
+    }
+
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        // TODO: add real markers from JSON (and show path between them)
+        map = googleMap;
+        googleMap.addMarker(new MarkerOptions()
+                .position(new LatLng(0, 0))
+                .title("Marker"));
     }
 }
 
