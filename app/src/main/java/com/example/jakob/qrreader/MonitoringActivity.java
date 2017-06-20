@@ -52,6 +52,7 @@ import java.util.Map;
 
 import static android.R.attr.colorPrimary;
 import static android.R.attr.data;
+import static com.example.jakob.qrreader.MonitorService.lastLon;
 import static com.example.jakob.qrreader.R.id.map;
 import static com.example.jakob.qrreader.ReadQRActivity.DB_DATA;
 
@@ -66,7 +67,7 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
     public int locationInterval;
     public boolean serviceRunning = false;
     private int notificationId = 0;
-    private TextView status;
+    private TextView status, time, temp, humidity, pressure, lat, lng;
     private MapView mapView;
     private GoogleMap map;
 
@@ -93,6 +94,7 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
                 JSONObject obj = new JSONObject(data);
 
                 // set toolbar title
+                // TODO: set correct title also onResume()
                 String title = obj.getString("title");
                 getSupportActionBar().setTitle(title);
 
@@ -192,6 +194,28 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
         } else {
             status.setText("Not running");
         }
+
+        // TODO: add measurement units
+        // TODO: do this in setLastValues()?
+
+        time = (TextView) findViewById(R.id.textView_time_latest_value);
+        time.setText(MonitorService.lastTime);
+
+        temp = (TextView) findViewById(R.id.textView_temp_value);
+        temp.setText(Double.toString(MonitorService.lastTemp));
+
+        humidity = (TextView) findViewById(R.id.textView_humidity_value);
+        humidity.setText(Double.toString(MonitorService.lastHumidity));
+
+        pressure = (TextView) findViewById(R.id.textView_pressure_value);
+        pressure.setText(Double.toString(MonitorService.lastPressure));
+
+        lat = (TextView) findViewById(R.id.textView_gps_x_value);
+        lat.setText(Double.toString(MonitorService.lastLat));
+
+        lng = (TextView) findViewById(R.id.textView_gps_y_value);
+        lng.setText(Double.toString(lastLon));
+
     }
 
 
@@ -230,10 +254,28 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
         @Override
         public void onReceive(Context context, Intent intent) {
             serviceRunning = intent.getBooleanExtra("status", false);
-            //Toast.makeText(MonitoringActivity.this, status, Toast.LENGTH_SHORT).show();
+            String lastTime = intent.getStringExtra("lastTime");
+            double lastLat = intent.getDoubleExtra("lastLat", -1);
+            double lastLong = intent.getDoubleExtra("lastLon", -1);
+            double lastTemp = intent.getDoubleExtra("lastTemp", -1);
+            double lastHumidity = intent.getDoubleExtra("lastHumidity", -1);
+            double lastPressure = intent.getDoubleExtra("lastPressure", -1);
+            
+            setLastValues(serviceRunning, lastTime, lastLat, lastLong, lastTemp, lastHumidity, lastPressure);
             Log.v(TAG, "Service running: " + serviceRunning);
         }
     };
+
+    
+    private void setLastValues(boolean serviceRunning, String lastTime, double lastLat, double lastLong, double lastTemp, double lastHumidity, double lastPressure) {
+        // TODO: also set service running??
+        time.setText(lastTime);
+        temp.setText(Double.toString(lastTemp));
+        humidity.setText(Double.toString(lastHumidity));
+        pressure.setText(Double.toString(lastPressure));
+        lat.setText(Double.toString(lastLat));
+        lng.setText(Double.toString(lastLong));
+    }
 
 
     // start backgroud service and send it json

@@ -54,16 +54,18 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
     public Location mLastLocation;
     public LocationRequest mLocationRequest;
     public String mLastUpdateTime;
+    public String mLastWeatherUpdate;
     public int locationInterval;
     private RequestQueue reQueue;
     private String weatherAppID = "126cb0f7fc8884208c5178d70cac7bea";
     private JSONArray dataJSON = new JSONArray();
     public static boolean serviceRunning = false;
     public static String lastTime;
-    public static String temp;
-    public static String humidity;
-    public static int lat;
-    public static int lon;
+    public static double lastTemp;
+    public static double lastHumidity;
+    public static double lastPressure;
+    public static double lastLat;
+    public static double lastLon;
 
 
     public MonitorService() {
@@ -88,10 +90,7 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
         } else if (mode == 1) {
             // return available data immediately
             Log.v(TAG, "Will return data!");
-            // sending result back to activity
-            Intent i = new Intent(ACTION);
-            i.putExtra("status", serviceRunning);
-            LocalBroadcastManager.getInstance(this).sendBroadcast(i);
+
         }
 
 
@@ -250,7 +249,7 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
         reQueue = Volley.newRequestQueue(this);
 
         // build url
-        String url ="http://api.openweathermap.org/data/2.5/weather?lat=" + lat + "&lon=" + lng + "&APPID=" + weatherAppID;
+        String url ="http://api.openweathermap.org/data/2.5/weather?lat=" + lat + "&lon=" + lng + "&APPID=" + weatherAppID + "&units=metric";
 
         // Request a string response from the provided URL.
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -258,9 +257,11 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
                     @Override
                     public void onResponse(String response) {
                         Log.v(TAG, "Weather response is: "+ response);
+                        mLastWeatherUpdate = response;
 
                         // once we get weather data, add it to JSON
                         addDataToJSON(response, location, updateTime);
+                        updateLastValues(response, location, updateTime);
                     }
                 }, new Response.ErrorListener() {
             @Override
@@ -273,6 +274,38 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
         // Add the request to the RequestQueue.
         reQueue.add(stringRequest);
     }
+
+
+    private void updateLastValues(String weather, Location location, String updateTime) {
+        // update view activity with latest values
+        lastTime = updateTime;
+        lastLat = location.getLatitude();
+        lastLon = location.getLongitude();
+
+        JSONObject weatherObject;
+        try {
+            weatherObject = new JSONObject(weather);
+            lastTemp = weatherObject.getJSONObject("main").getDouble("temp");
+            lastHumidity = weatherObject.getJSONObject("main").getDouble("humidity");
+            lastPressure = weatherObject.getJSONObject("main").getDouble("pressure");
+
+            // sending result back to activity
+            Intent i = new Intent(ACTION);
+            i.putExtra("status", serviceRunning);
+            i.putExtra("lastTime", lastTime);
+            i.putExtra("lastLat", lastLat);
+            i.putExtra("lastLon", lastLon);
+            i.putExtra("lastTemp", lastTemp);
+            i.putExtra("lastHumidity", lastHumidity);
+            i.putExtra("lastPressure", lastPressure);
+            LocalBroadcastManager.getInstance(this).sendBroadcast(i);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+    }
+
 
     private void addDataToJSON(String weatherData, Location locationData, String updateTime) {
         // new JSON object
@@ -301,6 +334,7 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
         Log.v(TAG, "Stopping service!");
         mGoogleApiClient.disconnect();
         serviceRunning = false;
+        // TODO: send Broadcast to view, so we know background activity stopped
     }
 
 }

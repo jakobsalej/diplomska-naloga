@@ -20,5 +20,6 @@
     <string name="textview_humidity">Humidity:</string>
     <string name="textview_coord_x">Lat:</string>
     <string name="textview_coord_y">Lon:</string>
+    <string name="textview_pressure">Pressure:</string>
 
 </resources>
