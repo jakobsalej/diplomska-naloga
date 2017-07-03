@@ -118,8 +118,15 @@ public class DisplayDataActivity extends AppCompatActivity {
             documentName.setText(result);
             data = result;
 
+            saveToDB(data);
+
             // TODO: parse JSON and display data
         }
+    }
+
+    private void saveToDB(String data) {
+        // add obtained data from server to local db
+        return;
     }
 
 

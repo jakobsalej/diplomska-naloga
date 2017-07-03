@@ -58,8 +58,9 @@
 
         <service
             android:name=".MonitorService"
-            android:exported="false"/>
+            android:exported="false" />
 
+        <activity android:name=".OrdersActivity"></activity>
     </application>
 
 </manifest>
