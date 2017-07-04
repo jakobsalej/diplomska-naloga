@@ -1,17 +1,92 @@
 package database;
 
-import android.provider.BaseColumns;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
-public final class OrderDocument {
-    // To prevent someone from accidentally instantiating the contract class,
-    // make the constructor private.
-    private OrderDocument() {}
+/**
+ * Created by jakob on 7/4/17.
+ */
 
-    /* Inner class that defines the table contents */
-    public static class DocumentEntry implements BaseColumns {
-        public static final String TABLE_NAME = "orderDocument";
-        public static final String COLUMN_NAME_ID = "id";
-        public static final String COLUMN_NAME_TITLE = "title";
-        public static final String COLUMN_NAME_SUBTITLE = "subtitle";
+public class OrderDocument {
+
+    @SerializedName("_id")
+    @Expose
+    private String id;
+    @SerializedName("text")
+    @Expose
+    private String text;
+    @SerializedName("title")
+    @Expose
+    private String title;
+    @SerializedName("documentID")
+    @Expose
+    private Integer documentID;
+    @SerializedName("__v")
+    @Expose
+    private Integer v;
+
+    /**
+     * No args constructor for use in serialization
+     *
+     */
+    public OrderDocument() {
     }
+
+    /**
+     *
+     * @param id
+     * @param v
+     * @param documentID
+     * @param title
+     * @param text
+     */
+    public OrderDocument(String id, String text, String title, Integer documentID, Integer v) {
+        super();
+        this.id = id;
+        this.text = text;
+        this.title = title;
+        this.documentID = documentID;
+        this.v = v;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public Integer getDocumentID() {
+        return documentID;
+    }
+
+    public void setDocumentID(Integer documentID) {
+        this.documentID = documentID;
+    }
+
+    public Integer getV() {
+        return v;
+    }
+
+    public void setV(Integer v) {
+        this.v = v;
+    }
+
 }

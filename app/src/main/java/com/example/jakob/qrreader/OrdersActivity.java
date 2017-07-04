@@ -13,9 +13,9 @@ import database.DatabaseHandler;
 public class OrdersActivity extends AppCompatActivity {
 
     private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
+    private RecyclerAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
-    public SQLiteDatabase db;
+    public static SQLiteDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,8 +32,8 @@ public class OrdersActivity extends AppCompatActivity {
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         // specify an adapter (see also next example)
-        //mAdapter = new MyAdapter(myDataset);
-        //mRecyclerView.setAdapter(mAdapter);
+        mAdapter = new RecyclerAdapter(DatabaseHandler.getOrders());
+        mRecyclerView.setAdapter(mAdapter);
 
     }
 

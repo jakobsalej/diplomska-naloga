@@ -9,6 +9,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,6 +18,10 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+
+import database.DatabaseHandler;
+import database.Order;
+import database.OrderDocument;
 
 import static com.example.jakob.qrreader.ReadQRActivity.DB_DATA;
 
@@ -126,7 +132,15 @@ public class DisplayDataActivity extends AppCompatActivity {
 
     private void saveToDB(String data) {
         // add obtained data from server to local db
-        return;
+        // parse JSON into object
+        Log.v("DISPLAYDATA", data);
+        Gson gson = new Gson();
+        OrderDocument od = gson.fromJson(data, OrderDocument.class);
+        // TODO: instead of creating object, try saving raw JSON directly as a blob to db? or as string
+        // https://stackoverflow.com/questions/16603621/how-to-store-json-object-in-sqlite-database
+
+        Log.v("DISPLAYDATA", od.getTitle());
+        DatabaseHandler.addOrder(od);
     }
 
 

@@ -1,5 +1,8 @@
 package database;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 public class Order {
 
     int id;
@@ -26,3 +29,5 @@ public class Order {
         return date;
     }
 }
+
+
