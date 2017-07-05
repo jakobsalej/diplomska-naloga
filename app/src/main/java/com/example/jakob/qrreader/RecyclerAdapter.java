@@ -1,5 +1,7 @@
 package com.example.jakob.qrreader;
 
+import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -42,6 +44,14 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemHo
         @Override
         public void onClick(View v) {
             Log.v("Rec view", "CLICK");
+
+            // TODO: start details intent when user clicks on one of the items
+            /*
+            Context context = itemView.getContext();
+            Intent showPhotoIntent = new Intent(context, PhotoActivity.class);
+            showPhotoIntent.putExtra(PHOTO_KEY, mPhoto);
+            context.startActivity(showPhotoIntent);
+            */
         }
     }
 

@@ -61,7 +61,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     // CREATE
     public static void addOrder(OrderDocument od) {
 
-        Log.v(TAG, "Adding order document " + od);
+        Log.v(TAG, "Adding order document " + od.getTitle() + ' ' + od.getText());
         ContentValues values = new ContentValues();
         values.put(DocumentEntry.COLUMN_NAME_TITLE, od.getTitle()); // Contact Name
         values.put(DocumentEntry.COLUMN_NAME_TEXT, od.getText()); // Contact Phone
@@ -86,9 +86,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 Log.v("DATABASE", String.valueOf(cursor));
                 OrderDocument od = new OrderDocument();
                 od.setId(cursor.getString(0));
-                Log.v("DATABASE", cursor.getString(0));
-                od.setTitle(cursor.getString(2));
-                Log.v("DATABASE", cursor.getString(2));
+                od.setText(cursor.getString(2));
+                od.setTitle(cursor.getString(1));
+                Log.v("DATABASEALL", cursor.getString(0) + ' ' + cursor.getString(1) + ' ' + cursor.getString(2));
+
 
                 odList.add(od);
             } while (cursor.moveToNext());
