@@ -117,7 +117,7 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
         final Intent i = new Intent(this, MonitorService.class);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setImageResource(R.drawable.ic_media_play);
+        fab.setImageResource(R.drawable.ic_media_play_light);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

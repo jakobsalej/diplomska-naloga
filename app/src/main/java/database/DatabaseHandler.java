@@ -12,27 +12,30 @@ import com.example.jakob.qrreader.OrdersActivity;
 import java.util.ArrayList;
 import java.util.List;
 
-import database.OrderDocumentHelper.DocumentEntry;
+import database.OrderDocumentJSONHelper.OrderDocumentJSONEntry;
 
 import static android.R.attr.order;
+import static database.OrderDocumentHelper.DocumentEntry.COLUMN_NAME_TEXT;
 
 public class DatabaseHandler extends SQLiteOpenHelper {
 
     // app's database for storing data we want to retain during reopening
 
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 2;
+    public static final int DATABASE_VERSION = 7;
     public static final String DATABASE_NAME = "db";
     private static final String TAG = "DatabaseHandler";
 
     private static final String SQL_CREATE_ENTRIES =
-            "CREATE TABLE " + DocumentEntry.TABLE_NAME + " (" +
-                    DocumentEntry.COLUMN_NAME_ID + " INTEGER PRIMARY KEY," +
-                    DocumentEntry.COLUMN_NAME_TITLE + " TEXT," +
-                    DocumentEntry.COLUMN_NAME_TEXT + " TEXT)";
+            "CREATE TABLE " + OrderDocumentJSONEntry.TABLE_NAME + " (" +
+                    OrderDocumentJSONEntry.COLUMN_NAME_ID + " INTEGER PRIMARY KEY," +
+                    OrderDocumentJSONEntry.COLUMN_NAME_TITLE + " TEXT," +
+                    OrderDocumentJSONEntry.COLUMN_NAME_DATA + " TEXT," +
+                    OrderDocumentJSONEntry.COLUMN_NAME_STATUS + " INTEGER," +
+                    OrderDocumentJSONEntry.COLUMN_NAME_DELIVERED + " INTEGER)";
 
     private static final String SQL_DELETE_ENTRIES =
-            "DROP TABLE IF EXISTS " + DocumentEntry.TABLE_NAME;
+            "DROP TABLE IF EXISTS " + OrderDocumentJSONEntry.TABLE_NAME;
 
 
     public DatabaseHandler (Context context) {
@@ -59,37 +62,41 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     // CRUD operations
 
     // CREATE
-    public static void addOrder(OrderDocument od) {
+    public static void addOrder(OrderDocumentJSON od) {
 
-        Log.v(TAG, "Adding order document " + od.getTitle() + ' ' + od.getText());
+        Log.v(TAG, "Adding order document " + od.toString());
         ContentValues values = new ContentValues();
-        values.put(DocumentEntry.COLUMN_NAME_TITLE, od.getTitle()); // Contact Name
-        values.put(DocumentEntry.COLUMN_NAME_TEXT, od.getText()); // Contact Phone
+        values.put(OrderDocumentJSONEntry.COLUMN_NAME_ID, od.getId());
+        values.put(OrderDocumentJSONEntry.COLUMN_NAME_TITLE, od.getTitle());
+        values.put(OrderDocumentJSONEntry.COLUMN_NAME_DATA, od.getData());
+        values.put(OrderDocumentJSONEntry.COLUMN_NAME_STATUS, od.getStatus());
+        values.put(OrderDocumentJSONEntry.COLUMN_NAME_DELIVERED, od.getDelivered());
 
         // Inserting Row
         SQLiteDatabase db = OrdersActivity.db;
-        db.insert(DocumentEntry.TABLE_NAME, null, values);
+        db.insert(OrderDocumentJSONEntry.TABLE_NAME, null, values);
 
         // TODO: close connection when exiting OrdersActivity
         //db.close(); // Closing database connection
     }
 
-    public static ArrayList<OrderDocument> getOrders() {
-        ArrayList<OrderDocument> odList = new ArrayList<OrderDocument>();
+    public static ArrayList<OrderDocumentJSON> getOrders() {
+        ArrayList<OrderDocumentJSON> odList = new ArrayList<OrderDocumentJSON>();
 
-        String selectQuery = "SELECT * FROM " + DocumentEntry.TABLE_NAME;
+        String selectQuery = "SELECT * FROM " + OrderDocumentJSONEntry.TABLE_NAME;
         SQLiteDatabase db = OrdersActivity.db;
         Cursor cursor = db.rawQuery(selectQuery, null);
 
         if (cursor.moveToFirst()) {
             do {
                 Log.v("DATABASE", String.valueOf(cursor));
-                OrderDocument od = new OrderDocument();
-                od.setId(cursor.getString(0));
-                od.setText(cursor.getString(2));
+                OrderDocumentJSON od = new OrderDocumentJSON();
+                od.setId(cursor.getInt(0));
                 od.setTitle(cursor.getString(1));
-                Log.v("DATABASEALL", cursor.getString(0) + ' ' + cursor.getString(1) + ' ' + cursor.getString(2));
-
+                od.setData(cursor.getString(2));
+                od.setStatus(cursor.getInt(3));
+                od.setDelivered(cursor.getInt(4));
+                //Log.v("DATABASEALL", cursor.getString(0) + ' ' + cursor.getString(1) + ' ' + cursor.getString(2));
 
                 odList.add(od);
             } while (cursor.moveToNext());

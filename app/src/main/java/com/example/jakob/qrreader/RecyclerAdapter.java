@@ -12,6 +12,9 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import database.OrderDocument;
+import database.OrderDocumentJSON;
+
+import static com.example.jakob.qrreader.ReadQRActivity.DB_DATA;
 
 /**
  * Created by jakob on 7/4/17.
@@ -19,13 +22,14 @@ import database.OrderDocument;
 
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemHolder> {
 
-    private ArrayList<OrderDocument> mItems;
+    private ArrayList<OrderDocumentJSON> mItems;
 
     public static class ItemHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private TextView mItemTitle;
         private TextView mItemText;
-        private OrderDocument mItem;
+        private OrderDocumentJSON mItem;
+        private static final String ITEM_KEY = "ITEM";
 
         public ItemHolder(View v) {
             super(v);
@@ -35,10 +39,10 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemHo
             v.setOnClickListener(this);
         }
 
-        public void bindItem(OrderDocument od) {
+        public void bindItem(OrderDocumentJSON od) {
             mItem = od;
             mItemTitle.setText(od.getTitle());
-            mItemText.setText(od.getText());
+            mItemText.setText(od.getId().toString());
         }
 
         @Override
@@ -46,16 +50,18 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemHo
             Log.v("Rec view", "CLICK");
 
             // TODO: start details intent when user clicks on one of the items
-            /*
+
             Context context = itemView.getContext();
-            Intent showPhotoIntent = new Intent(context, PhotoActivity.class);
-            showPhotoIntent.putExtra(PHOTO_KEY, mPhoto);
-            context.startActivity(showPhotoIntent);
-            */
+            Intent showItemIntent = new Intent(context, DisplayDataActivity.class);
+            showItemIntent.putExtra(DB_DATA, mItem.getData());
+            showItemIntent.putExtra("item_details", true);
+            context.startActivity(showItemIntent);
+
+
         }
     }
 
-    public RecyclerAdapter(ArrayList<OrderDocument> items) {
+    public RecyclerAdapter(ArrayList<OrderDocumentJSON> items) {
         mItems = items;
     }
 
@@ -68,7 +74,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemHo
 
     @Override
     public void onBindViewHolder(RecyclerAdapter.ItemHolder holder, int position) {
-        OrderDocument odItem = mItems.get(position);
+        OrderDocumentJSON odItem = mItems.get(position);
         holder.bindItem(odItem);
     }
 

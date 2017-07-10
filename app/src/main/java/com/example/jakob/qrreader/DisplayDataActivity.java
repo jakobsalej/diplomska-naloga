@@ -7,9 +7,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,6 +26,7 @@ import java.net.URL;
 import database.DatabaseHandler;
 import database.Order;
 import database.OrderDocument;
+import database.OrderDocumentJSON;
 
 import static com.example.jakob.qrreader.ReadQRActivity.DB_DATA;
 
@@ -37,15 +42,22 @@ public class DisplayDataActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_data);
 
+        documentName = (TextView) findViewById(R.id.textView_item_raw);
+
         // Get the Intent that started this activity and extract the string
         Intent intent = getIntent();
-        String data = intent.getStringExtra(DB_DATA);
 
-        // Capture the layout's TextView and set the string as its text
-        documentName = (TextView) findViewById(R.id.textview_document_name);
-        //documentName.setText("Getting data...");
-
-        new GetDataFromDB().execute(BASE_URL + data);
+        data = intent.getStringExtra(DB_DATA);
+        Boolean detailsView = intent.getBooleanExtra("item_details", false);
+        if (detailsView) {
+            // if it's details view, hide 'Add' button and don't get new data from API
+            Button addButton = (Button) findViewById(R.id.button_document_add);
+            addButton.setVisibility(View.GONE);
+            documentName.setText(data);
+        } else {
+            // get data from API if it's not a detail view
+            new GetDataFromDB().execute(BASE_URL + data);
+        }
     }
 
 
@@ -124,7 +136,7 @@ public class DisplayDataActivity extends AppCompatActivity {
             documentName.setText(result);
             data = result;
 
-            saveToDB(data);
+            //saveToDB(data);
 
             // TODO: parse JSON and display data
         }
@@ -134,13 +146,30 @@ public class DisplayDataActivity extends AppCompatActivity {
         // add obtained data from server to local db
         // parse JSON into object
         Log.v("DISPLAYDATA", data);
-        Gson gson = new Gson();
-        OrderDocument od = gson.fromJson(data, OrderDocument.class);
+        JSONObject obj = null;
+        try {
+            obj = new JSONObject(data);
+            int id = obj.getInt("documentID");
+            String title = obj.getString("title");
+            int status = obj.getInt("status");
+            int delivered = obj.getInt("successfullyDelivered");
+            OrderDocumentJSON  odj = new OrderDocumentJSON(id, title, data, status, delivered);
+            Log.v("DISPLAYDATA", odj.toString());
+
+            // add to DB
+            DatabaseHandler.addOrder(odj);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        // set toolbar title
+        // TODO: set correct title also onResume()
+
+        //Gson gson = new Gson();
+        //OrderDocumentJSON od = gson.fromJson(data, OrderDocumentJSON.class);
         // TODO: instead of creating object, try saving raw JSON directly as a blob to db? or as string
         // https://stackoverflow.com/questions/16603621/how-to-store-json-object-in-sqlite-database
-
-        Log.v("DISPLAYDATA", od.getTitle());
-        DatabaseHandler.addOrder(od);
     }
 
 
@@ -148,6 +177,12 @@ public class DisplayDataActivity extends AppCompatActivity {
         Intent intent = new Intent(this, MonitoringActivity.class);
 
         intent.putExtra(DB_DATA, data);
+        startActivity(intent);
+    }
+
+    public void addToQueue(View view) {
+        saveToDB(data);     // TODO: this should not be on main thread?
+        Intent intent = new Intent(this, OrdersActivity.class);
         startActivity(intent);
     }
 }

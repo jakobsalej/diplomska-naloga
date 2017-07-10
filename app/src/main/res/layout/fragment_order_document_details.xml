@@ -1,0 +1,19 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/item_details_fragment"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.jakob.qrreader.OrderDocumentDetailsFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="General info"
+        android:padding="16dp"
+        android:fontFamily="sans-serif-medium"
+        android:textStyle="normal"
+        android:textSize="14sp"
+        android:textColor="@color/colorPrimary"/>
+
+</FrameLayout>
