@@ -14,6 +14,7 @@ import java.util.List;
 
 import database.OrderDocumentJSONHelper.OrderDocumentJSONEntry;
 
+import static android.R.attr.logo;
 import static android.R.attr.order;
 import static database.OrderDocumentHelper.DocumentEntry.COLUMN_NAME_TEXT;
 
@@ -79,6 +80,27 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         // TODO: close connection when exiting OrdersActivity
         //db.close(); // Closing database connection
     }
+
+
+    public static OrderDocumentJSON getOrder(int id) {
+        SQLiteDatabase db = OrdersActivity.db;
+        String selectQuery = "SELECT  * FROM " + OrderDocumentJSONEntry.TABLE_NAME + " WHERE " + OrderDocumentJSONEntry.COLUMN_NAME_ID + "=" + String.valueOf(id);
+        Log.v("DB query", selectQuery);
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        //Cursor cursor =  db.query(OrderDocumentJSONEntry.TABLE_NAME, new String[] { " * " }, OrderDocumentJSONEntry.COLUMN_NAME_ID + "=?",
+        //        new String[] { String.valueOf(id) }, null, null, null, null);
+
+        if (!cursor.moveToFirst()) {
+            Log.v("DB", "No entry with such ID to get!");
+            return null;
+        }
+
+        OrderDocumentJSON od = new OrderDocumentJSON(cursor.getInt(0), cursor.getString(1), cursor.getString(2), cursor.getInt(3), cursor.getInt(4));
+        return od;
+
+    }
+
 
     public static ArrayList<OrderDocumentJSON> getOrders() {
         ArrayList<OrderDocumentJSON> odList = new ArrayList<OrderDocumentJSON>();

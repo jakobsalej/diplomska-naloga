@@ -28,7 +28,9 @@ import database.Order;
 import database.OrderDocument;
 import database.OrderDocumentJSON;
 
+import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
 import static com.example.jakob.qrreader.ReadQRActivity.DB_DATA;
+import static database.DatabaseHandler.getOrder;
 
 public class DisplayDataActivity extends AppCompatActivity {
 
@@ -43,20 +45,30 @@ public class DisplayDataActivity extends AppCompatActivity {
         setContentView(R.layout.activity_display_data);
 
         documentName = (TextView) findViewById(R.id.textView_item_raw);
+        Button addButton = (Button) findViewById(R.id.button_document_add);
 
         // Get the Intent that started this activity and extract the string
         Intent intent = getIntent();
-
         data = intent.getStringExtra(DB_DATA);
         Boolean detailsView = intent.getBooleanExtra("item_details", false);
+
+        // if it's details view, hide 'Add' button and don't get new data from API
         if (detailsView) {
-            // if it's details view, hide 'Add' button and don't get new data from API
-            Button addButton = (Button) findViewById(R.id.button_document_add);
             addButton.setVisibility(View.GONE);
             documentName.setText(data);
         } else {
-            // get data from API if it's not a detail view
-            new GetDataFromDB().execute(BASE_URL + data);
+            // check if we have Order document with this ID already
+            OrderDocumentJSON od = DatabaseHandler.getOrder(Integer.parseInt(data));
+            if (od != null) {
+                // we do have that doc already!
+                // get the same json as if we got it from server
+                data = od.getData();
+                addButton.setVisibility(View.GONE);
+                documentName.setText(data);
+            } else {
+                // get data from API if it's not a detail view
+                new GetDataFromDB().execute(BASE_URL + data);
+            }
         }
     }
 
@@ -175,14 +187,21 @@ public class DisplayDataActivity extends AppCompatActivity {
 
     public void startMonitoring(View view) {
         Intent intent = new Intent(this, MonitoringActivity.class);
-
         intent.putExtra(DB_DATA, data);
+        startActivity(intent);
+    }
+
+    public void stopMonitoring(View view) {
+        Intent intent = new Intent(this, ReadQRActivity.class);
         startActivity(intent);
     }
 
     public void addToQueue(View view) {
         saveToDB(data);     // TODO: this should not be on main thread?
         Intent intent = new Intent(this, OrdersActivity.class);
+
+        // clear back button stack
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
     }
 }
