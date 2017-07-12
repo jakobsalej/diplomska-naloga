@@ -96,6 +96,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             return null;
         }
 
+        // create new object
         OrderDocumentJSON od = new OrderDocumentJSON(cursor.getInt(0), cursor.getString(1), cursor.getString(2), cursor.getInt(3), cursor.getInt(4));
         return od;
 
