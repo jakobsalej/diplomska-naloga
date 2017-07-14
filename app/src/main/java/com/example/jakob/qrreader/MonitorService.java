@@ -58,7 +58,7 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
     public int locationInterval;
     private RequestQueue reQueue;
     private String weatherAppID = "126cb0f7fc8884208c5178d70cac7bea";
-    private JSONArray dataJSON = new JSONArray();
+    private static JSONArray dataJSON = new JSONArray();
     public static boolean serviceRunning = false;
     public static String lastTime;
     public static double lastTemp;
@@ -66,6 +66,7 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
     public static double lastPressure;
     public static double lastLat;
     public static double lastLon;
+    public static int measurementsLength = 0;
 
 
     public MonitorService() {
@@ -326,6 +327,10 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
         Log.v(TAG, "Array length: " +  dataJSON.length());
     }
 
+
+    public static int getMeasurementsLength() {
+        return dataJSON.length();
+    }
 
 
     @Override

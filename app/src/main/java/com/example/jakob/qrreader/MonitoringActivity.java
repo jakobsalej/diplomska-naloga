@@ -65,7 +65,7 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
     public LocationRequest mLocationRequest;
     public DateFormat mLastUpdateTime;
     public int locationInterval;
-    public boolean serviceRunning = false;
+    public static boolean serviceRunning = false;
     private int notificationId = 0;
     private TextView status, time, temp, humidity, pressure, lat, lng;
     private MapView mapView;

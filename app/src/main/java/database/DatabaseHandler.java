@@ -14,16 +14,12 @@ import java.util.List;
 
 import database.OrderDocumentJSONHelper.OrderDocumentJSONEntry;
 
-import static android.R.attr.logo;
-import static android.R.attr.order;
-import static database.OrderDocumentHelper.DocumentEntry.COLUMN_NAME_TEXT;
-
 public class DatabaseHandler extends SQLiteOpenHelper {
 
     // app's database for storing data we want to retain during reopening
 
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 7;
+    public static final int DATABASE_VERSION = 9;
     public static final String DATABASE_NAME = "db";
     private static final String TAG = "DatabaseHandler";
 
@@ -33,6 +29,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                     OrderDocumentJSONEntry.COLUMN_NAME_TITLE + " TEXT," +
                     OrderDocumentJSONEntry.COLUMN_NAME_DATA + " TEXT," +
                     OrderDocumentJSONEntry.COLUMN_NAME_STATUS + " INTEGER," +
+                    OrderDocumentJSONEntry.COLUMN_NAME_CUSTOMER + " TEXT," +
+                    OrderDocumentJSONEntry.COLUMN_NAME_START_LOCATION + " TEXT," +
+                    OrderDocumentJSONEntry.COLUMN_NAME_END_LOCATION + " TEXT," +
+                    OrderDocumentJSONEntry.COLUMN_NAME_MIN_TEMP + " DOUBLE," +
+                    OrderDocumentJSONEntry.COLUMN_NAME_MAX_TEMP + " DOUBLE," +
+                    OrderDocumentJSONEntry.COLUMN_NAME_MEASUREMENTS + " TEXT," +
                     OrderDocumentJSONEntry.COLUMN_NAME_DELIVERED + " INTEGER)";
 
     private static final String SQL_DELETE_ENTRIES =
@@ -72,6 +74,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(OrderDocumentJSONEntry.COLUMN_NAME_DATA, od.getData());
         values.put(OrderDocumentJSONEntry.COLUMN_NAME_STATUS, od.getStatus());
         values.put(OrderDocumentJSONEntry.COLUMN_NAME_DELIVERED, od.getDelivered());
+        values.put(OrderDocumentJSONEntry.COLUMN_NAME_CUSTOMER, od.getCustomer());
+        values.put(OrderDocumentJSONEntry.COLUMN_NAME_START_LOCATION, od.getStartLocation());
+        values.put(OrderDocumentJSONEntry.COLUMN_NAME_END_LOCATION, od.getEndLocation());
+        values.put(OrderDocumentJSONEntry.COLUMN_NAME_MIN_TEMP, od.getMinTemp());
+        values.put(OrderDocumentJSONEntry.COLUMN_NAME_MAX_TEMP, od.getMaxTemp());
+        values.put(OrderDocumentJSONEntry.COLUMN_NAME_MEASUREMENTS, od.getMeasurements());
 
         // Inserting Row
         SQLiteDatabase db = OrdersActivity.db;
@@ -84,7 +92,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     public static OrderDocumentJSON getOrder(int id) {
         SQLiteDatabase db = OrdersActivity.db;
-        String selectQuery = "SELECT  * FROM " + OrderDocumentJSONEntry.TABLE_NAME + " WHERE " + OrderDocumentJSONEntry.COLUMN_NAME_ID + "=" + String.valueOf(id);
+        String selectQuery =
+                "SELECT  * FROM " + OrderDocumentJSONEntry.TABLE_NAME + " WHERE " +
+                        OrderDocumentJSONEntry.COLUMN_NAME_ID + "=" + String.valueOf(id);
         Log.v("DB query", selectQuery);
         Cursor cursor = db.rawQuery(selectQuery, null);
 
@@ -97,7 +107,19 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
 
         // create new object
-        OrderDocumentJSON od = new OrderDocumentJSON(cursor.getInt(0), cursor.getString(1), cursor.getString(2), cursor.getInt(3), cursor.getInt(4));
+        OrderDocumentJSON od = new OrderDocumentJSON(
+                        cursor.getInt(0),
+                        cursor.getString(1),
+                        cursor.getString(2),
+                        cursor.getInt(3),
+                        cursor.getInt(4),
+                        cursor.getString(5),
+                        cursor.getString(6),
+                        cursor.getString(7),
+                        cursor.getDouble(8),
+                        cursor.getDouble(9),
+                        cursor.getString(10)
+        );
         return od;
 
     }
@@ -113,14 +135,30 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             do {
                 Log.v("DATABASE", String.valueOf(cursor));
+                /*
                 OrderDocumentJSON od = new OrderDocumentJSON();
                 od.setId(cursor.getInt(0));
                 od.setTitle(cursor.getString(1));
                 od.setData(cursor.getString(2));
                 od.setStatus(cursor.getInt(3));
                 od.setDelivered(cursor.getInt(4));
+                */
                 //Log.v("DATABASEALL", cursor.getString(0) + ' ' + cursor.getString(1) + ' ' + cursor.getString(2));
 
+                // create new object
+                OrderDocumentJSON od = new OrderDocumentJSON(
+                        cursor.getInt(0),
+                        cursor.getString(1),
+                        cursor.getString(2),
+                        cursor.getInt(3),
+                        cursor.getInt(4),
+                        cursor.getString(5),
+                        cursor.getString(6),
+                        cursor.getString(7),
+                        cursor.getDouble(8),
+                        cursor.getDouble(9),
+                        cursor.getString(10)
+                );
                 odList.add(od);
             } while (cursor.moveToNext());
         }

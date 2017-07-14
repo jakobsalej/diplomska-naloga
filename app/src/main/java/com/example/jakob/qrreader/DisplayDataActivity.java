@@ -29,6 +29,7 @@ import database.OrderDocument;
 import database.OrderDocumentJSON;
 
 import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
+import static com.example.jakob.qrreader.MonitorService.getMeasurementsLength;
 import static com.example.jakob.qrreader.ReadQRActivity.DB_DATA;
 import static database.DatabaseHandler.getOrder;
 
@@ -156,6 +157,11 @@ public class DisplayDataActivity extends AppCompatActivity {
 
     private void saveToDB(String data) {
         // add obtained data from server to local db
+
+        // get start index (measurements length at the moment of saving to db)
+        int startIndex = MonitorService.getMeasurementsLength();
+        Log.v("DISPLAYDATA", "Start index is " + startIndex);
+
         // parse JSON into object
         Log.v("DISPLAYDATA", data);
         JSONObject obj = null;
@@ -165,7 +171,27 @@ public class DisplayDataActivity extends AppCompatActivity {
             String title = obj.getString("title");
             int status = obj.getInt("status");
             int delivered = obj.getInt("successfullyDelivered");
-            OrderDocumentJSON  odj = new OrderDocumentJSON(id, title, data, status, delivered);
+            String customer = obj.getJSONObject("customer").getString("name");
+            String startLocation = obj.getJSONObject("startLocation").getString("x") + ","
+                    + obj.getJSONObject("startLocation").getString("y");
+            String endLocation = obj.getJSONObject("endLocation").getString("x") + ","
+                    + obj.getJSONObject("endLocation").getString("y");
+            double minTemp = 0;         // TODO: get it from DB
+            double maxTemp = 10;        // TODO: get it from DB
+            String measurements = String.valueOf(startIndex);  // save index.. TODO: separate field?
+            OrderDocumentJSON  odj = new OrderDocumentJSON(
+                    id,
+                    title,
+                    data,
+                    status,
+                    delivered,
+                    customer,
+                    startLocation,
+                    endLocation,
+                    minTemp,
+                    maxTemp,
+                    measurements
+            );
             Log.v("DISPLAYDATA", odj.toString());
 
             // add to DB
@@ -194,6 +220,8 @@ public class DisplayDataActivity extends AppCompatActivity {
     public void stopMonitoring(View view) {
         Intent intent = new Intent(this, ReadQRActivity.class);
         startActivity(intent);
+
+        // TODO - edit this!! update entry in db, add endIndex
     }
 
     public void addToQueue(View view) {

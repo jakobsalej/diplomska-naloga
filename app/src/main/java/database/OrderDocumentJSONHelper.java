@@ -15,5 +15,11 @@ public final class OrderDocumentJSONHelper {
         public static final String COLUMN_NAME_DATA = "data";
         public static final String COLUMN_NAME_STATUS = "status";
         public static final String COLUMN_NAME_DELIVERED = "delivered";
+        public static final String COLUMN_NAME_CUSTOMER = "customer";
+        public static final String COLUMN_NAME_START_LOCATION = "startLocation";
+        public static final String COLUMN_NAME_END_LOCATION = "endLocation";
+        public static final String COLUMN_NAME_MIN_TEMP = "minTemp";
+        public static final String COLUMN_NAME_MAX_TEMP = "maxTemp";
+        public static final String COLUMN_NAME_MEASUREMENTS = "measurements";
     }
 }
