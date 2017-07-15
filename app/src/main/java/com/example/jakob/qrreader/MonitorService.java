@@ -35,9 +35,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.DateFormat;
+import java.util.Arrays;
 import java.util.Date;
 
 import static android.R.attr.data;
+import static android.R.attr.start;
 
 
 /**
@@ -329,7 +331,21 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
 
 
     public static int getMeasurementsLength() {
+        // length of measurememnts array at the moment of requesting
         return dataJSON.length();
+    }
+
+    public static JSONArray getMeasurements(int startIndex, int endIndex) {
+        // return subArray of measurements based on startIndex / endIndex
+        JSONArray subArray = new JSONArray();
+        for (int i = startIndex; i < endIndex; i ++) {
+            try {
+                subArray.put(dataJSON.get(i));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return subArray;
     }
 
 

@@ -9,6 +9,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+
 import java.util.ArrayList;
 
 import database.OrderDocument;
@@ -51,10 +53,15 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemHo
 
             // TODO: start details intent when user clicks on one of the items
 
+            // convert object to string to pass it to another activity
+            String odJSON = (new Gson().toJson(mItem));
+
             Context context = itemView.getContext();
             Intent showItemIntent = new Intent(context, DisplayDataActivity.class);
             showItemIntent.putExtra(DB_DATA, mItem.getData());
             showItemIntent.putExtra("item_details", true);
+            showItemIntent.putExtra("item", odJSON);
+            showItemIntent.putExtra("startIndex", mItem.getStartIndex());
             context.startActivity(showItemIntent);
 
 

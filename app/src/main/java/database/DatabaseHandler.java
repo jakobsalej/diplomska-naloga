@@ -19,7 +19,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     // app's database for storing data we want to retain during reopening
 
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 9;
+    public static final int DATABASE_VERSION = 10;
     public static final String DATABASE_NAME = "db";
     private static final String TAG = "DatabaseHandler";
 
@@ -35,6 +35,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                     OrderDocumentJSONEntry.COLUMN_NAME_MIN_TEMP + " DOUBLE," +
                     OrderDocumentJSONEntry.COLUMN_NAME_MAX_TEMP + " DOUBLE," +
                     OrderDocumentJSONEntry.COLUMN_NAME_MEASUREMENTS + " TEXT," +
+                    OrderDocumentJSONEntry.COLUMN_NAME_START_INDEX + " INTEGER," +
+                    OrderDocumentJSONEntry.COLUMN_NAME_END_INDEX + " INTEGER," +
                     OrderDocumentJSONEntry.COLUMN_NAME_DELIVERED + " INTEGER)";
 
     private static final String SQL_DELETE_ENTRIES =
@@ -80,6 +82,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(OrderDocumentJSONEntry.COLUMN_NAME_MIN_TEMP, od.getMinTemp());
         values.put(OrderDocumentJSONEntry.COLUMN_NAME_MAX_TEMP, od.getMaxTemp());
         values.put(OrderDocumentJSONEntry.COLUMN_NAME_MEASUREMENTS, od.getMeasurements());
+        values.put(OrderDocumentJSONEntry.COLUMN_NAME_START_INDEX, od.getStartIndex());
+        values.put(OrderDocumentJSONEntry.COLUMN_NAME_END_INDEX, od.getEndIndex());
 
         // Inserting Row
         SQLiteDatabase db = OrdersActivity.db;
@@ -87,6 +91,21 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         // TODO: close connection when exiting OrdersActivity
         //db.close(); // Closing database connection
+    }
+
+    // UPDATE
+    public static int updateOrder(OrderDocumentJSON od) {
+
+        Log.v(TAG, "Updating order document " + od.toString());
+        ContentValues values = new ContentValues();
+        values.put(OrderDocumentJSONEntry.COLUMN_NAME_MEASUREMENTS, od.getMeasurements());
+        values.put(OrderDocumentJSONEntry.COLUMN_NAME_END_INDEX, od.getEndIndex());
+
+        // Inserting Row
+        SQLiteDatabase db = OrdersActivity.db;
+        return db.update(OrderDocumentJSONEntry.TABLE_NAME, values,
+                OrderDocumentJSONEntry.COLUMN_NAME_ID + " = ?",
+                new String[] { String.valueOf(od.getId()) });
     }
 
 
@@ -118,7 +137,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                         cursor.getString(7),
                         cursor.getDouble(8),
                         cursor.getDouble(9),
-                        cursor.getString(10)
+                        cursor.getString(10),
+                        cursor.getInt(11),
+                        cursor.getInt(12)
         );
         return od;
 
@@ -157,7 +178,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                         cursor.getString(7),
                         cursor.getDouble(8),
                         cursor.getDouble(9),
-                        cursor.getString(10)
+                        cursor.getString(10),
+                        cursor.getInt(11),
+                        cursor.getInt(12)
                 );
                 odList.add(od);
             } while (cursor.moveToNext());

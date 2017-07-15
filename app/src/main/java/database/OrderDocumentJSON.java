@@ -47,6 +47,12 @@ public class OrderDocumentJSON implements Serializable
     @SerializedName("measurements")
     @Expose
     private String measurements;
+    @SerializedName("startIndex")
+    @Expose
+    private Integer startIndex;
+    @SerializedName("endIndex")
+    @Expose
+    private Integer endIndex;
     private final static long serialVersionUID = -2917451307888388000L;
 
     /**
@@ -56,7 +62,7 @@ public class OrderDocumentJSON implements Serializable
     public OrderDocumentJSON() {
     }
 
-    public OrderDocumentJSON(Integer id, String title, String data, Integer status, Integer delivered, String customer, String startLocation, String endLocation, Double minTemp, Double maxTemp, String measurements) {
+    public OrderDocumentJSON(Integer id, String title, String data, Integer status, Integer delivered, String customer, String startLocation, String endLocation, Double minTemp, Double maxTemp, String measurements, Integer startIndex, Integer endIndex) {
         super();
         this.id = id;
         this.title = title;
@@ -69,6 +75,8 @@ public class OrderDocumentJSON implements Serializable
         this.minTemp = minTemp;
         this.maxTemp = maxTemp;
         this.measurements = measurements;
+        this.startIndex = startIndex;
+        this.endIndex = endIndex;
     }
 
     public Integer getId() {
@@ -159,10 +167,25 @@ public class OrderDocumentJSON implements Serializable
         this.measurements = measurements;
     }
 
+    public Integer getStartIndex() {
+        return startIndex;
+    }
+
+    public void setStartIndex(Integer startIndex) {
+        this.startIndex = startIndex;
+    }
+
+    public Integer getEndIndex() {
+        return endIndex;
+    }
+
+    public void setEndIndex(Integer endIndex) {
+        this.endIndex = endIndex;
+    }
 
     @Override
     public String toString() {
-        return "OrderDocumentJSON [id = "+id+", title = "+title+", delivered = "+delivered+", status = "+status+", data = "+data+", maxTemp = "+maxTemp+", measurements = "+measurements+", endLocation = "+endLocation+", startLocation = "+startLocation+", minTemp = "+minTemp+", customer = "+customer+"]";
+        return "OrderDocumentJSON [id = "+id+", title = "+title+", delivered = "+delivered+", status = "+status+", data = "+data+", maxTemp = "+maxTemp+", measurements = "+measurements+", endLocation = "+endLocation+", startLocation = "+startLocation+", minTemp = "+minTemp+", customer = "+customer+", startIndex = "+startIndex+", endIndex = "+endIndex+"]";
     }
 
 }

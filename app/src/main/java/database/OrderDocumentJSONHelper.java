@@ -21,5 +21,7 @@ public final class OrderDocumentJSONHelper {
         public static final String COLUMN_NAME_MIN_TEMP = "minTemp";
         public static final String COLUMN_NAME_MAX_TEMP = "maxTemp";
         public static final String COLUMN_NAME_MEASUREMENTS = "measurements";
+        public static final String COLUMN_NAME_START_INDEX = "startIndex";
+        public static final String COLUMN_NAME_END_INDEX = "endIndex";
     }
 }

@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -22,12 +23,14 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 
 import database.DatabaseHandler;
 import database.Order;
 import database.OrderDocument;
 import database.OrderDocumentJSON;
 
+import static android.R.attr.order;
 import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
 import static com.example.jakob.qrreader.MonitorService.getMeasurementsLength;
 import static com.example.jakob.qrreader.ReadQRActivity.DB_DATA;
@@ -36,9 +39,11 @@ import static database.DatabaseHandler.getOrder;
 public class DisplayDataActivity extends AppCompatActivity {
 
     ProgressDialog pd;
-    TextView documentName;
+    TextView documentName, textViewMeasurements;
     String BASE_URL = "https://diploma-server-rest.herokuapp.com/api/documents/";
     String data;
+    OrderDocumentJSON od;
+    private int startIndex;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,15 +51,21 @@ public class DisplayDataActivity extends AppCompatActivity {
         setContentView(R.layout.activity_display_data);
 
         documentName = (TextView) findViewById(R.id.textView_item_raw);
+        textViewMeasurements = (TextView) findViewById(R.id.textView_measurements);
         Button addButton = (Button) findViewById(R.id.button_document_add);
 
         // Get the Intent that started this activity and extract the string
         Intent intent = getIntent();
         data = intent.getStringExtra(DB_DATA);
         Boolean detailsView = intent.getBooleanExtra("item_details", false);
+        startIndex = intent.getIntExtra("startIndex", 0);
 
         // if it's details view, hide 'Add' button and don't get new data from API
         if (detailsView) {
+            String odJSON = intent.getStringExtra("item");
+            od = (new Gson().fromJson(odJSON, OrderDocumentJSON.class));
+            Log.v("DISPLAYDATA", "object " + od.toString());
+
             addButton.setVisibility(View.GONE);
             documentName.setText(data);
         } else {
@@ -160,6 +171,7 @@ public class DisplayDataActivity extends AppCompatActivity {
 
         // get start index (measurements length at the moment of saving to db)
         int startIndex = MonitorService.getMeasurementsLength();
+        int endIndex = 0;
         Log.v("DISPLAYDATA", "Start index is " + startIndex);
 
         // parse JSON into object
@@ -190,7 +202,9 @@ public class DisplayDataActivity extends AppCompatActivity {
                     endLocation,
                     minTemp,
                     maxTemp,
-                    measurements
+                    measurements,
+                    startIndex,
+                    endIndex
             );
             Log.v("DISPLAYDATA", odj.toString());
 
@@ -217,12 +231,49 @@ public class DisplayDataActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void stopMonitoring(View view) {
-        Intent intent = new Intent(this, ReadQRActivity.class);
-        startActivity(intent);
 
-        // TODO - edit this!! update entry in db, add endIndex
+    public void stopMonitoring(View view) {
+        // stop the monitoring and get measurements
+        int endIndex = MonitorService.getMeasurementsLength();
+        String measurements = "";
+
+        // check if background service is even running
+        if (MonitorService.serviceRunning) {
+            JSONArray measurementsJSON = MonitorService.getMeasurements(startIndex, endIndex);
+            measurements = measurementsJSON.toString();
+            textViewMeasurements.setText(measurements);
+        }
+
+        // append measurements to JSON for server update
+        // TODO: add moar fields to 'transport' (dispozicija...)
+        String newData = null;
+        String newTransport = null;
+        try {
+            // create new 'transport' object and add measurements to it
+            JSONObject transport = new JSONObject();
+            transport.put("measurementsList", measurements);
+            newTransport = transport.toString();
+
+            // add newly created object as a 'transport' field to existing OrderDocument object
+            JSONObject obj = new JSONObject(data);
+            obj.put("transport", transport);
+            newData = obj.toString();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+        // update local db (object)
+        if (od != null) {
+            od.setMeasurements(newTransport);
+            od.setData(newData);
+            Log.v("DISPLAYDATA", "Updating order! " + od.toString());
+        }
+
+        // update DB (local + server)
+        DatabaseHandler.updateOrder(od);
     }
+
 
     public void addToQueue(View view) {
         saveToDB(data);     // TODO: this should not be on main thread?
