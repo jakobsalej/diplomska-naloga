@@ -7,12 +7,14 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import com.example.jakob.qrreader.OrdersActivity;
+import com.example.jakob.qrreader.Main2Activity;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import database.OrderDocumentJSONHelper.OrderDocumentJSONEntry;
+
+import static android.R.attr.id;
 
 public class DatabaseHandler extends SQLiteOpenHelper {
 
@@ -86,10 +88,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(OrderDocumentJSONEntry.COLUMN_NAME_END_INDEX, od.getEndIndex());
 
         // Inserting Row
-        SQLiteDatabase db = OrdersActivity.db;
+        SQLiteDatabase db = Main2Activity.db;
         db.insert(OrderDocumentJSONEntry.TABLE_NAME, null, values);
 
-        // TODO: close connection when exiting OrdersActivity
+        // TODO: close connection when exiting Main2Activity
         //db.close(); // Closing database connection
     }
 
@@ -102,7 +104,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(OrderDocumentJSONEntry.COLUMN_NAME_END_INDEX, od.getEndIndex());
 
         // Inserting Row
-        SQLiteDatabase db = OrdersActivity.db;
+        SQLiteDatabase db = Main2Activity.db;
         return db.update(OrderDocumentJSONEntry.TABLE_NAME, values,
                 OrderDocumentJSONEntry.COLUMN_NAME_ID + " = ?",
                 new String[] { String.valueOf(od.getId()) });
@@ -110,7 +112,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
 
     public static OrderDocumentJSON getOrder(int id) {
-        SQLiteDatabase db = OrdersActivity.db;
+        SQLiteDatabase db = Main2Activity.db;
         String selectQuery =
                 "SELECT  * FROM " + OrderDocumentJSONEntry.TABLE_NAME + " WHERE " +
                         OrderDocumentJSONEntry.COLUMN_NAME_ID + "=" + String.valueOf(id);
@@ -146,11 +148,18 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
 
-    public static ArrayList<OrderDocumentJSON> getOrders() {
+    public static ArrayList<OrderDocumentJSON> getOrders(int status) {
         ArrayList<OrderDocumentJSON> odList = new ArrayList<OrderDocumentJSON>();
 
-        String selectQuery = "SELECT * FROM " + OrderDocumentJSONEntry.TABLE_NAME;
-        SQLiteDatabase db = OrdersActivity.db;
+        String selectQuery = "";
+        if (status == -1) {
+            selectQuery = "SELECT * FROM " + OrderDocumentJSONEntry.TABLE_NAME;
+        } else {
+            // get back documents based on status
+            selectQuery = "SELECT  * FROM " + OrderDocumentJSONEntry.TABLE_NAME + " WHERE " +
+                    OrderDocumentJSONEntry.COLUMN_NAME_STATUS+ "=" + status;
+        }
+        SQLiteDatabase db = Main2Activity.db;
         Cursor cursor = db.rawQuery(selectQuery, null);
 
         if (cursor.moveToFirst()) {
@@ -188,5 +197,4 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         return odList;
     }
-
 }

@@ -10,7 +10,44 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <TextView
+        <android.support.v7.widget.CardView
+            android:id="@+id/monitoring_status_card"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:backgroundTint="@color/colorAccent"
+            android:layout_margin="8dp" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Monitoring is currently not running"
+                    android:textColor="@android:color/white"
+                    style="@style/Base.TextAppearance.Widget.AppCompat.Toolbar.Title"
+                    android:paddingLeft="8dp"
+                    android:textSize="16sp"
+                    android:layout_gravity="start|center"
+                    android:gravity="start"/>
+
+                <TextView
+                    android:id="@+id/textView2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:textAlignment="textStart"
+                    android:text="" />
+
+                <Button
+                    android:id="@+id/button_start_monitor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Start"
+                    android:textColor="@color/colorPrimary"
+                    android:layout_gravity="end|center"
+                    style="@style/Widget.AppCompat.Button.Borderless"/>
+
+        </android.support.v7.widget.CardView>
+
+        <!--TextView
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:text="Ongoing"
@@ -18,7 +55,7 @@
             android:fontFamily="sans-serif-medium"
             android:textStyle="normal"
             android:textSize="14sp"
-            android:textColor="@color/colorPrimary"/>
+            android:textColor="@color/colorPrimary"/ -->
 
         <!-- A RecyclerView with some commonly used attributes -->
 
@@ -31,5 +68,7 @@
         </android.support.v7.widget.RecyclerView>
 
     </LinearLayout>
+
+
 
 </RelativeLayout>

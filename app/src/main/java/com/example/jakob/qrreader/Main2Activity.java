@@ -1,5 +1,6 @@
 package com.example.jakob.qrreader;
 
+import android.database.sqlite.SQLiteDatabase;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -11,6 +12,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,6 +21,20 @@ import android.view.ViewGroup;
 
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import database.DatabaseHandler;
+import database.OrderDocumentJSON;
+
+import static android.R.attr.fragment;
+import static com.example.jakob.qrreader.R.id.container;
+import static database.DatabaseHandler.getOrders;
 
 public class Main2Activity extends AppCompatActivity {
 
@@ -36,21 +52,25 @@ public class Main2Activity extends AppCompatActivity {
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
+    public static SQLiteDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
 
+        // prepare DB
+        DatabaseHandler mDbHelper = new DatabaseHandler(this);
+        db = mDbHelper.getWritableDatabase();
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.container);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
+        mViewPager = (ViewPager) findViewById(container);
+        setupViewPager(mViewPager);
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
@@ -82,6 +102,15 @@ public class Main2Activity extends AppCompatActivity {
     }
 
 
+    private void setupViewPager(ViewPager viewPager) {
+        SectionsPagerAdapter adapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        adapter.addFragment(new MainTabFragment());
+        adapter.addFragment(new MainTabFragment());
+        adapter.addFragment(new MainTabFragment());
+        viewPager.setAdapter(adapter);
+    }
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -105,17 +134,6 @@ public class Main2Activity extends AppCompatActivity {
     }
 
 
-    /* TODO: continue here!
-    private void setupViewPager(ViewPager viewPager) {
-        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        adapter.addFragment(new OneFragment(), "ONE");
-        adapter.addFragment(new TwoFragment(), "TWO");
-        adapter.addFragment(new ThreeFragment(), "THREE");
-        viewPager.setAdapter(adapter);
-    }
-    */
-
-
 
     /**
      * A placeholder fragment containing a simple view.
@@ -136,10 +154,35 @@ public class Main2Activity extends AppCompatActivity {
          */
         public static PlaceholderFragment newInstance(int sectionNumber) {
             PlaceholderFragment fragment = new PlaceholderFragment();
+
+            ArrayList<OrderDocumentJSON> dbData = getDataFromDB(sectionNumber);
+            Log.v("NEW TAB", dbData.toString());
+
+            ArrayList<String> dataFields = new ArrayList<String>();
+            for (OrderDocumentJSON od : dbData) {
+                dataFields.add(0, od.getData());
+            }
+
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
+            args.putString("dbDataString", dbData.toString());
+            args.putStringArrayList("data", dataFields);
             fragment.setArguments(args);
             return fragment;
+        }
+
+        private static ArrayList<OrderDocumentJSON> getDataFromDB(int sectionNumber) {
+            // get data from DB, based on status: 0 = not started, 1 = running, 2 = done, 3 = cleared
+            if (sectionNumber == 0) {
+                ArrayList<OrderDocumentJSON> odArray0 = DatabaseHandler.getOrders(0);
+                ArrayList<OrderDocumentJSON> odArray1 = DatabaseHandler.getOrders(1);
+                odArray0.addAll(odArray1);
+                return odArray0;
+            } else if(sectionNumber == 1) {
+                return getOrders(2);
+            } else {
+                return getOrders(3);
+            }
         }
 
         @Override
@@ -156,15 +199,23 @@ public class Main2Activity extends AppCompatActivity {
      */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
+        private final List<Fragment> mFragmentList = new ArrayList<>();
+
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 
         @Override
         public Fragment getItem(int position) {
-            // getItem is called to instantiate the fragment for the given page.
-            // Return a PlaceholderFragment (defined as a static inner class below).
-            return PlaceholderFragment.newInstance(position + 1);
+            Fragment f = mFragmentList.get(position);
+            Bundle args = new Bundle();
+            args.putInt("position", position);
+            f.setArguments(args);
+            return f;
+        }
+
+        public void addFragment(Fragment fragment) {
+            mFragmentList.add(fragment);
         }
 
         @Override

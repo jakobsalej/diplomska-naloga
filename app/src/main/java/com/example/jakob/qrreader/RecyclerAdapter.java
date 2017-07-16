@@ -13,7 +13,6 @@ import com.google.gson.Gson;
 
 import java.util.ArrayList;
 
-import database.OrderDocument;
 import database.OrderDocumentJSON;
 
 import static com.example.jakob.qrreader.ReadQRActivity.DB_DATA;
@@ -37,14 +36,14 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemHo
             super(v);
 
             mItemTitle = (TextView) v.findViewById(R.id.rec_item_title);
-            mItemText = (TextView) v.findViewById(R.id.rec_item_id);
+            mItemText = (TextView) v.findViewById(R.id.rec_item_subtitle);
             v.setOnClickListener(this);
         }
 
         public void bindItem(OrderDocumentJSON od) {
             mItem = od;
             mItemTitle.setText(od.getTitle());
-            mItemText.setText(od.getId().toString());
+            mItemText.setText(od.getCustomer());
         }
 
         @Override

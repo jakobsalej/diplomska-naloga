@@ -2,25 +2,30 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:paddingTop="8dp">
 
     <TextView
         android:id="@+id/rec_item_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:paddingBottom="8dp"
-        android:textSize="14sp"
+        android:paddingTop="20dp"
+        android:paddingBottom="2dp"
+        android:paddingRight="16dp"
+        android:paddingLeft="16dp"
+        android:textSize="16sp"
         android:text="Title"
+        android:textColor="@android:color/black"
         android:textStyle="normal" />
 
     <TextView
-        android:id="@+id/rec_item_id"
+        android:id="@+id/rec_item_subtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:paddingTop="4dp"
-        android:textSize="10sp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingBottom="20dp"
+        android:textSize="14sp"
         android:textStyle="normal"
         android:text="Subtitle text"/>
 
