@@ -253,6 +253,8 @@ public class DisplayDataActivity extends AppCompatActivity {
             JSONObject transport = new JSONObject();
             transport.put("measurementsList", measurements);
             newTransport = transport.toString();
+            // TODO: popup that asks if order was successfully delivered and option to add 'opombe'
+            // when user clicks 'DONE'
 
             // add newly created object as a 'transport' field to existing OrderDocument object
             JSONObject obj = new JSONObject(data);

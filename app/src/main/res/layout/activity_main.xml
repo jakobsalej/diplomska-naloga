@@ -42,4 +42,13 @@
         android:onClick="showGraph"
         android:layout_centerHorizontal="true" />
 
+    <Button
+        android:id="@+id/show_main"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Show main"
+        android:layout_below="@+id/show_graph"
+        android:onClick="mainActivity"
+        android:layout_centerHorizontal="true" />
+
 </RelativeLayout>
