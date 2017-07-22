@@ -41,6 +41,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Start"
+                    android:textSize="16sp"
                     android:textColor="@color/colorPrimary"
                     android:layout_gravity="end|center"
                     style="@style/Widget.AppCompat.Button.Borderless"/>

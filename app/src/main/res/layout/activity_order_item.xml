@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context="com.example.jakob.qrreader.OrderItemActivity">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme">
+
+        <android.support.design.widget.CollapsingToolbarLayout
+            android:id="@+id/collapsing_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:contentScrim="?attr/colorPrimary"
+            app:collapsedTitleTextAppearance="@style/TextAppearance.AppCompat.Title.Inverse"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+
+            <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:map="http://schemas.android.com/apk/res-auto"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:id="@+id/map"
+                android:name="com.google.android.gms.maps.SupportMapFragment"
+                android:layout_width="match_parent"
+                android:layout_height="250dp"
+                tools:context="com.example.mapwithmarker.MapsMarkerActivity"
+                app:layout_collapseMode="parallax"
+                map:uiRotateGestures="false"
+                map:uiScrollGestures="false"
+                map:uiTiltGestures="false"
+                map:uiZoomControls="false"
+                map:uiZoomGestures="false"/>
+
+            <android.support.v7.widget.Toolbar
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"/>
+
+        </android.support.design.widget.CollapsingToolbarLayout>
+
+    </android.support.design.widget.AppBarLayout>
+
+
+    <android.support.v4.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingTop="24dp">
+
+            <TextView
+                android:id="@+id/textView_sender"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                android:text="Sender"
+                android:drawableLeft="@drawable/ic_local_shipping_black_24px"
+                android:drawableTint="@color/colorPrimary"
+                android:drawablePadding="32dp"
+                android:gravity="bottom"/>
+
+            <TextView
+                android:id="@+id/textView_sender_details"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="56dp"
+                android:layout_marginBottom="16dp"
+                android:text="Details" />
+
+            <TextView
+                android:id="@+id/textView_receiver"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                android:fontFamily="sans-serif"
+                android:text="Receiver"
+                android:drawableLeft="@drawable/ic_location_city_black_24px"
+                android:drawableTint="@color/colorPrimary"
+                android:drawablePadding="32dp"
+                android:gravity="bottom"/>
+
+            <TextView
+                android:id="@+id/textView_receiver_details"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="56dp"
+                android:layout_marginBottom="16dp"
+                android:fontFamily="sans-serif"
+                android:text="Details" />
+
+            <View
+                style="@style/Divider"
+                android:layout_marginStart="56dp"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:id="@+id/textView_status"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                android:text="Status"
+                android:drawableLeft="@drawable/ic_equalizer_black_24px"
+                android:drawableTint="@color/colorPrimary"
+                android:drawablePadding="32dp"
+                android:gravity="bottom"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:id="@+id/textView_vehicleType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                android:text="Transport type"
+                android:drawableLeft="@drawable/ic_directions_car_black_24px"
+                android:drawableTint="@color/colorPrimary"
+                android:drawablePadding="32dp"
+                android:gravity="bottom"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:id="@+id/textView_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                android:text="Date"
+                android:drawableLeft="@drawable/ic_schedule_black_24px"
+                android:drawableTint="@color/colorPrimary"
+                android:drawablePadding="32dp"
+                android:gravity="bottom"
+                android:layout_marginBottom="16dp"/>
+
+            <View
+                style="@style/Divider"
+                android:layout_marginStart="56dp"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:id="@+id/textView_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                android:text="Comments"
+                android:drawableLeft="@drawable/ic_insert_comment_black_24px"
+                android:drawableTint="@color/colorPrimary"
+                android:drawablePadding="32dp"
+                android:gravity="bottom"
+                android:layout_marginBottom="16dp"/>
+
+            <Button
+                android:id="@+id/button4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:text="Add" />
+
+
+        </LinearLayout>
+
+
+    </android.support.v4.widget.NestedScrollView>
+
+</android.support.design.widget.CoordinatorLayout>

@@ -279,7 +279,7 @@ public class DisplayDataActivity extends AppCompatActivity {
 
     public void addToQueue(View view) {
         saveToDB(data);     // TODO: this should not be on main thread?
-        Intent intent = new Intent(this, OrdersActivity.class);
+        Intent intent = new Intent(this, Main2Activity.class);
 
         // clear back button stack
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

@@ -56,7 +56,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemHo
             String odJSON = (new Gson().toJson(mItem));
 
             Context context = itemView.getContext();
-            Intent showItemIntent = new Intent(context, DisplayDataActivity.class);
+            Intent showItemIntent = new Intent(context, OrderItemActivity.class);
             showItemIntent.putExtra(DB_DATA, mItem.getData());
             showItemIntent.putExtra("item_details", true);
             showItemIntent.putExtra("item", odJSON);

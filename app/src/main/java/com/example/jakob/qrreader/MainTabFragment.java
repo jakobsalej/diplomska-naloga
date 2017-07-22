@@ -69,7 +69,7 @@ public class MainTabFragment extends Fragment{
 
         // monitoring status card show only on ongoing tab
         CardView mCardMonitoringStatus = (CardView) view.findViewById(R.id.monitoring_status_card);
-        if (position > 0) {
+        if (position > 0 || dbData.size() == 0) {
             mCardMonitoringStatus.setVisibility(View.GONE);
         }
 

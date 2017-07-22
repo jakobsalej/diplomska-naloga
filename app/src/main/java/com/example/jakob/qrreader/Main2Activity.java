@@ -1,5 +1,6 @@
 package com.example.jakob.qrreader;
 
+import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -90,6 +91,7 @@ public class Main2Activity extends AppCompatActivity {
         tabLayout.getTabAt(1).setIcon(R.drawable.ic_check_circle_white_24px);
         tabLayout.getTabAt(2).setIcon(R.drawable.ic_history_white_24px);
 
+        /*
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -98,7 +100,7 @@ public class Main2Activity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
-
+        */
     }
 
 
@@ -133,65 +135,6 @@ public class Main2Activity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-
-
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        private static final String ARG_SECTION_NUMBER = "section_number";
-
-        public PlaceholderFragment() {
-        }
-
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
-
-            ArrayList<OrderDocumentJSON> dbData = getDataFromDB(sectionNumber);
-            Log.v("NEW TAB", dbData.toString());
-
-            ArrayList<String> dataFields = new ArrayList<String>();
-            for (OrderDocumentJSON od : dbData) {
-                dataFields.add(0, od.getData());
-            }
-
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            args.putString("dbDataString", dbData.toString());
-            args.putStringArrayList("data", dataFields);
-            fragment.setArguments(args);
-            return fragment;
-        }
-
-        private static ArrayList<OrderDocumentJSON> getDataFromDB(int sectionNumber) {
-            // get data from DB, based on status: 0 = not started, 1 = running, 2 = done, 3 = cleared
-            if (sectionNumber == 0) {
-                ArrayList<OrderDocumentJSON> odArray0 = DatabaseHandler.getOrders(0);
-                ArrayList<OrderDocumentJSON> odArray1 = DatabaseHandler.getOrders(1);
-                odArray0.addAll(odArray1);
-                return odArray0;
-            } else if(sectionNumber == 1) {
-                return getOrders(2);
-            } else {
-                return getOrders(3);
-            }
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main_tab, container, false);
-            return rootView;
-        }
-    }
 
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
@@ -236,5 +179,12 @@ public class Main2Activity extends AppCompatActivity {
             }
             return null;
         }
+    }
+
+
+    // add new document - open QR reader
+    public void scanCode(View view) {
+        Intent intent = new Intent(this, ReadQRActivity.class);
+        startActivity(intent);
     }
 }

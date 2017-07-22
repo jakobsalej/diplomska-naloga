@@ -124,6 +124,7 @@ public class ReadQRActivity extends AppCompatActivity {
         });
     }
 
+    /*
     public void showData(View view) {
         Intent intent = new Intent(this, DisplayDataActivity.class);
         TextView barcodeInfo = (TextView) findViewById(R.id.code_info);
@@ -134,14 +135,18 @@ public class ReadQRActivity extends AppCompatActivity {
         intent.putExtra(DB_DATA, data);
         startActivity(intent);
     }
+    */
 
-    public void showDocumentData(String id) {
-        Intent intent = new Intent(this, DisplayDataActivity.class);
+
+    public void showData(View view) {
+        Intent intent = new Intent(this, OrderItemActivity.class);
+        TextView barcodeInfo = (TextView) findViewById(R.id.code_info);
 
         // for now just displaying text, later making call to REST services
-        String data = id;
+        String data = barcodeInfo.getText().toString();
 
         intent.putExtra(DB_DATA, data);
         startActivity(intent);
     }
+
 }
