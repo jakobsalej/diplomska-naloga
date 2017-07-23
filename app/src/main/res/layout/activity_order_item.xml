@@ -93,14 +93,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="56dp"
-                android:layout_marginBottom="16dp"
                 android:fontFamily="sans-serif"
                 android:text="Details" />
 
             <View
                 style="@style/Divider"
                 android:layout_marginStart="56dp"
-                android:layout_marginBottom="16dp"/>
+                android:layout_marginBottom="24dp"
+                android:layout_marginTop="24dp"/>
 
             <TextView
                 android:id="@+id/textView_status"
@@ -135,13 +135,13 @@
                 android:drawableLeft="@drawable/ic_schedule_black_24px"
                 android:drawableTint="@color/colorPrimary"
                 android:drawablePadding="32dp"
-                android:gravity="bottom"
-                android:layout_marginBottom="16dp"/>
+                android:gravity="bottom" />
 
             <View
                 style="@style/Divider"
                 android:layout_marginStart="56dp"
-                android:layout_marginBottom="16dp"/>
+                android:layout_marginBottom="24dp"
+                android:layout_marginTop="24dp"/>
 
             <TextView
                 android:id="@+id/textView_text"
@@ -152,8 +152,36 @@
                 android:drawableLeft="@drawable/ic_insert_comment_black_24px"
                 android:drawableTint="@color/colorPrimary"
                 android:drawablePadding="32dp"
-                android:gravity="bottom"
-                android:layout_marginBottom="16dp"/>
+                android:gravity="bottom" />
+
+            <View
+                style="@style/Divider"
+                android:layout_marginStart="56dp"
+                android:layout_marginBottom="24dp"
+                android:layout_marginTop="24dp"/>
+
+            <FrameLayout
+                android:id="@+id/fragment_holder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="56dp">
+            </FrameLayout>
+
+            <Button
+                android:id="@+id/button_show_all"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:layout_marginStart="40dp"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                android:text="Show all" />
+
+
+            <View
+                style="@style/Divider"
+                android:layout_marginStart="56dp"
+                android:layout_marginBottom="24dp"
+                android:layout_marginTop="24dp"/>
 
             <Button
                 android:id="@+id/button4"

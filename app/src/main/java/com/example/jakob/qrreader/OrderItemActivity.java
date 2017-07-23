@@ -3,12 +3,20 @@ package com.example.jakob.qrreader;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.CardView;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdate;
@@ -22,6 +30,7 @@ import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.Gson;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -38,11 +47,11 @@ import database.OrderDocumentJSON;
 
 import static com.example.jakob.qrreader.ReadQRActivity.DB_DATA;
 
-public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCallback {
-
+public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCallback, CommonItemFragment.OnFragmentInteractionListener {
 
     String BASE_URL = "https://diploma-server-rest.herokuapp.com/api/documents/";
 
+    private FrameLayout fragmentHolder;
     private GoogleMap mMap;
     private CollapsingToolbarLayout collapsingToolbarLayout;
     private ProgressDialog pd;
@@ -51,6 +60,13 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
     private String data;
     private int startIndex;
     private OrderDocumentJSON od;
+
+
+    @Override
+    public void onFragmentInteraction(Uri uri){
+        //you can leave it empty
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +91,9 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        // get items fragment
+        fragmentHolder = (FrameLayout) findViewById(R.id.fragment_holder);
 
         // Get the Intent that started this activity and extract the string
         Intent intent = getIntent();
@@ -172,6 +191,16 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
             String text = obj.getString("text");
             textTextView.setText(text);
 
+            // cargo
+            //JSONObject cargoObj = obj.getJSONObject("cargo");
+            //JSONArray cargoItems = cargoObj.getJSONArray("items");
+            JSONArray cargoItems = obj.getJSONArray("cargo");
+
+            // add cargo items fragment
+            CommonItemFragment fragment = CommonItemFragment.newInstance("cargo", cargoItems.toString());
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fragment_holder, fragment).commit();
+
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -194,7 +223,7 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
                 builder.include(end);
                 LatLngBounds bounds = builder.build();
 
-                // TODO: fix crasing when rotating
+                // TODO: fix crashing when rotating
                 int width = getResources().getDisplayMetrics().widthPixels;
                 int height = getResources().getDisplayMetrics().heightPixels;
                 int padding = (int) (width * 0.35); // offset from edges of the map 10% of screen
