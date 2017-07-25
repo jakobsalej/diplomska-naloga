@@ -12,9 +12,12 @@ import android.util.SparseArray;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.barcode.Barcode;
@@ -25,14 +28,15 @@ import java.io.IOException;
 public class ReadQRActivity extends AppCompatActivity {
 
     public static final String DB_DATA = "com.example.myfirstapp.DB_DATA";
+    private static int first = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_read_qr);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         final SurfaceView cameraView = (SurfaceView) findViewById(R.id.camera_view);
-        final TextView barcodeInfo = (TextView) findViewById(R.id.code_info);
-        final Button getData = (Button) findViewById(R.id.button_get_data);
 
         // new instance of barcode detector...
         BarcodeDetector barcodeDetector =
@@ -92,61 +96,47 @@ public class ReadQRActivity extends AppCompatActivity {
             @Override
             public void receiveDetections(Detector.Detections<Barcode> detections) {
                 final SparseArray<Barcode> barcodes = detections.getDetectedItems();
+                Log.v("QR", "New detection!");
 
-                if (barcodes.size() != 0) {
-                    // showDocumentData(barcodes.valueAt(0).displayValue);
-                    // TODO: too many new activities??
-
-                    barcodeInfo.post(new Runnable() {    // Use the post method of the TextView
-                        public void run() {
-                            barcodeInfo.setText(    // Update the TextView
-                                    barcodes.valueAt(0).displayValue
-                            );
-
-                            // TODO: call new intent (without user clicking button)
-                            /*
-                            if (barcode != null) {
-                                Intent intent = new Intent();
-                                intent.putExtra(BarcodeObject, barcode);
-                                setResult(CommonStatusCodes.SUCCESS, intent);
-                                finish();
-                            }
-                             */
-
-
-                            // enable get_data button when we get QR code
-                            getData.setVisibility(View.VISIBLE);
-
-                        }
-                    });
+                if (barcodes.size() != 0 && first == 0) {
+                    first = 1;
+                    Intent intent = new Intent(getBaseContext(), OrderItemActivity.class);
+                    intent.putExtra(DB_DATA, barcodes.valueAt(0).displayValue);
+                    startActivity(intent);
                 }
             }
         });
     }
 
-    /*
-    public void showData(View view) {
-        Intent intent = new Intent(this, DisplayDataActivity.class);
-        TextView barcodeInfo = (TextView) findViewById(R.id.code_info);
 
-        // for now just displaying text, later making call to REST services
-        String data = barcodeInfo.getText().toString();
-
-        intent.putExtra(DB_DATA, data);
-        startActivity(intent);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        first = 0;
     }
-    */
 
 
     public void showData(View view) {
+
+        // hide keyboard
+        // Check if no view has focus:
+        View view2 = this.getCurrentFocus();
+        if (view2 != null) {
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view2.getWindowToken(), 0);
+        }
+
         Intent intent = new Intent(this, OrderItemActivity.class);
-        TextView barcodeInfo = (TextView) findViewById(R.id.code_info);
+        EditText barcodeInfo = (EditText) findViewById(R.id.editText_id);
 
         // for now just displaying text, later making call to REST services
         String data = barcodeInfo.getText().toString();
 
-        intent.putExtra(DB_DATA, data);
-        startActivity(intent);
+        // only start new activity if there is some data in edit field
+        if (data.length() > 0) {
+            intent.putExtra(DB_DATA, data);
+            startActivity(intent);
+        }
     }
 
 }

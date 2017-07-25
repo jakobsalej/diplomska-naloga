@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.jakob.qrreader.ReadQRActivity">
+    tools:context="com.example.jakob.qrreader.ReadQRActivity" >
 
     <SurfaceView
         android:layout_width="match_parent"
@@ -13,29 +13,49 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentBottom="true"
-        android:layout_below="@+id/code_info" />
+        android:layout_below="@+id/editText_id" />
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/code_info"
-        android:textSize="20sp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:layout_marginTop="8dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
         android:text="@string/textview_qr_data"
-        android:layout_alignBottom="@+id/button_get_data"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_marginBottom="8dp" />
+        android:layout_marginBottom="12dp" />
+
+    <EditText
+        android:id="@+id/editText_id"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/code_info"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:paddingRight="8dp"
+        android:layout_toLeftOf="@+id/button_get_data"
+        android:layout_toStartOf="@+id/button_get_data" />
 
     <Button
         android:id="@+id/button_get_data"
+        android:layout_alignBottom="@+id/editText_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
+        android:layout_marginRight="16dp"
+        android:layout_marginLeft="8dp"
         android:onClick="showData"
         android:text="@string/button_get_document"
-        android:visibility="invisible" />
+        style="@style/Widget.AppCompat.Button.Colored"/>
+
 
 
 </RelativeLayout>

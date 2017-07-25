@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Diplomska naloga</string>
-    <string name="button_get_document">Get document</string>
-    <string name="textview_qr_data">Waiting for QR data...</string>
+    <string name="button_get_document">Get</string>
+    <string name="textview_qr_data">To add new document, please scan QR code or manually enter document ID.</string>
     <string name="button_scan_code">Scan QR code</string>
     <string name="button_show_map">Show Map</string>
     <string name="title_activity_maps">Map</string>
@@ -27,5 +27,6 @@
     <string name="title_activity_main2">Main2Activity</string>
     <string name="action_settings">Settings</string>
     <string name="section_format">Hello World from section: %1$d</string>
+    <string name="add_new_doc_string">Add new document</string>
 
 </resources>

@@ -15,6 +15,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -55,6 +56,7 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
 
     String BASE_URL = "https://diploma-server-rest.herokuapp.com/api/documents/";
 
+    private Button addBtn;
     private GoogleMap mMap;
     private CollapsingToolbarLayout collapsingToolbarLayout;
     private ProgressDialog pd;
@@ -85,10 +87,20 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
         dateTextView = (TextView) findViewById(R.id.textView_date);
         vehicleTextView = (TextView) findViewById(R.id.textView_vehicleType);
         textTextView = (TextView) findViewById(R.id.textView_text);
+        addBtn = (Button) findViewById(R.id.button_add_item);
+
+        // save data to local DB when user clicks ADD
+        addBtn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                if (data != null) {
+                    saveToDB(data);
+                }
+            }
+        });
 
         // get toolbar and set title
         collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
-        collapsingToolbarLayout.setTitle("Some document");
+        collapsingToolbarLayout.setTitle("Document title");
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -261,9 +273,7 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
         return null;
-
     }
 
 
@@ -367,7 +377,7 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
         }
     }
 
-    private void saveToDB(String data) {
+    public void saveToDB(String data) {
         // add obtained data from server to local db
 
         // get start index (measurements length at the moment of saving to db)
@@ -380,6 +390,7 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
         JSONObject obj = null;
         try {
             obj = new JSONObject(data);
+            Log.v("OBJECT", obj.toString());
             int id = obj.getInt("documentID");
             String title = obj.getString("title");
             int status = obj.getInt("status");
@@ -423,5 +434,10 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
         //OrderDocumentJSON od = gson.fromJson(data, OrderDocumentJSON.class);
         // TODO: instead of creating object, try saving raw JSON directly as a blob to db? or as string
         // https://stackoverflow.com/questions/16603621/how-to-store-json-object-in-sqlite-database
+    }
+
+
+    public void onAddClick() {
+        saveToDB(data);
     }
 }
