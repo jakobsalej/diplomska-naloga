@@ -41,6 +41,10 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
 import database.DatabaseHandler;
 import database.OrderDocumentJSON;
@@ -51,7 +55,6 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
 
     String BASE_URL = "https://diploma-server-rest.herokuapp.com/api/documents/";
 
-    private FrameLayout fragmentHolder;
     private GoogleMap mMap;
     private CollapsingToolbarLayout collapsingToolbarLayout;
     private ProgressDialog pd;
@@ -91,9 +94,6 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
-        // get items fragment
-        fragmentHolder = (FrameLayout) findViewById(R.id.fragment_holder);
 
         // Get the Intent that started this activity and extract the string
         Intent intent = getIntent();
@@ -185,7 +185,17 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
             // date
             String date = obj.getString("dateDeadline");
             // TODO: parse date
-            dateTextView.setText(date);
+            SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+            parser.setTimeZone(TimeZone.getTimeZone("GMT"));
+            String formattedDate = null;
+            try {
+                Date parsedDate = parser.parse(date);
+                SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy (HH:mm)");
+                formattedDate = formatter.format(parsedDate);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            dateTextView.setText("Created on " + formattedDate);
 
             // text
             String text = obj.getString("text");

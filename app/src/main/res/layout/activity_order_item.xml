@@ -63,10 +63,10 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
                 android:text="Sender"
-                android:drawableLeft="@drawable/ic_local_shipping_black_24px"
+                android:drawableLeft="@drawable/ic_place_black_24px"
                 android:drawableTint="@color/colorPrimary"
                 android:drawablePadding="32dp"
-                android:gravity="bottom"/>
+                android:gravity="center_vertical"/>
 
             <TextView
                 android:id="@+id/textView_sender_details"
@@ -83,10 +83,9 @@
                 android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
                 android:fontFamily="sans-serif"
                 android:text="Receiver"
-                android:drawableLeft="@drawable/ic_location_city_black_24px"
-                android:drawableTint="@color/colorPrimary"
+                android:layout_marginStart="56dp"
                 android:drawablePadding="32dp"
-                android:gravity="bottom"/>
+                android:gravity="center_vertical"/>
 
             <TextView
                 android:id="@+id/textView_receiver_details"
@@ -111,7 +110,7 @@
                 android:drawableLeft="@drawable/ic_equalizer_black_24px"
                 android:drawableTint="@color/colorPrimary"
                 android:drawablePadding="32dp"
-                android:gravity="bottom"
+                android:gravity="center_vertical"
                 android:layout_marginBottom="16dp"/>
 
             <TextView
@@ -120,11 +119,16 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
                 android:text="Transport type"
-                android:drawableLeft="@drawable/ic_directions_car_black_24px"
-                android:drawableTint="@color/colorPrimary"
+                android:layout_marginLeft="56dp"
                 android:drawablePadding="32dp"
-                android:gravity="bottom"
-                android:layout_marginBottom="16dp"/>
+                android:gravity="center_vertical"
+                />
+
+            <View
+                style="@style/Divider"
+                android:layout_marginStart="56dp"
+                android:layout_marginBottom="24dp"
+                android:layout_marginTop="24dp"/>
 
             <TextView
                 android:id="@+id/textView_date"
@@ -135,13 +139,58 @@
                 android:drawableLeft="@drawable/ic_schedule_black_24px"
                 android:drawableTint="@color/colorPrimary"
                 android:drawablePadding="32dp"
-                android:gravity="bottom" />
+                android:gravity="center_vertical" />
 
             <View
                 style="@style/Divider"
                 android:layout_marginStart="56dp"
                 android:layout_marginBottom="24dp"
                 android:layout_marginTop="24dp"/>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                    android:text="Cargo"
+                    android:textSize="14dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:textColor="@color/colorPrimary"
+                    android:drawableLeft="@drawable/ic_local_shipping_black_24px"
+                    android:drawableTint="@color/colorPrimary"
+                    android:drawablePadding="32dp"
+                    android:gravity="center_vertical"
+                    android:layout_centerVertical="true" />
+
+                <Button
+                    android:id="@+id/button_show_all"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentRight="true"
+                    style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                    android:text="Show all" />
+
+
+            </RelativeLayout>
+
+
+            <FrameLayout
+                android:id="@+id/fragment_holder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="56dp">
+            </FrameLayout>
+
+            <View
+                style="@style/Divider"
+                android:layout_marginStart="56dp"
+                android:layout_marginBottom="24dp"
+                android:layout_marginTop="14dp"/>
 
             <TextView
                 android:id="@+id/textView_text"
@@ -152,42 +201,17 @@
                 android:drawableLeft="@drawable/ic_insert_comment_black_24px"
                 android:drawableTint="@color/colorPrimary"
                 android:drawablePadding="32dp"
-                android:gravity="bottom" />
-
-            <View
-                style="@style/Divider"
-                android:layout_marginStart="56dp"
                 android:layout_marginBottom="24dp"
-                android:layout_marginTop="24dp"/>
-
-            <FrameLayout
-                android:id="@+id/fragment_holder"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="56dp">
-            </FrameLayout>
-
-            <Button
-                android:id="@+id/button_show_all"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="start"
-                android:layout_marginStart="40dp"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
-                android:text="Show all" />
+                android:gravity="center_vertical" />
 
 
-            <View
-                style="@style/Divider"
-                android:layout_marginStart="56dp"
-                android:layout_marginBottom="24dp"
-                android:layout_marginTop="24dp"/>
 
             <Button
                 android:id="@+id/button4"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
+                android:layout_marginBottom="8dp"
                 style="@style/Widget.AppCompat.Button.Colored"
                 android:text="Add" />
 
