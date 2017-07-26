@@ -64,7 +64,7 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
     public Location mLastLocation;
     public LocationRequest mLocationRequest;
     public DateFormat mLastUpdateTime;
-    public int locationInterval;
+    public int locationInterval = 300;
     public static boolean serviceRunning = false;
     private int notificationId = 0;
     private TextView status, time, temp, humidity, pressure, lat, lng;
@@ -85,7 +85,6 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
 
         // set location interval
         // TODO: get this from settings?
-        locationInterval = 120;
         final int timeDelta = locationInterval;
 
         // parse JSON
@@ -347,7 +346,7 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
     // continous location updates
     protected void createLocationRequest() {
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(10000);    // TODO: set from 'location interval'
+        mLocationRequest.setInterval(120000);    // TODO: set from 'location interval'
         mLocationRequest.setFastestInterval(5000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 

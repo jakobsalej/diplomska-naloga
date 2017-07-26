@@ -44,7 +44,8 @@
                     android:textSize="16sp"
                     android:textColor="@color/colorPrimary"
                     android:layout_gravity="end|center"
-                    style="@style/Widget.AppCompat.Button.Borderless"/>
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:onClick="startMonitoring"/>
 
         </android.support.v7.widget.CardView>
 

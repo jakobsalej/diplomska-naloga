@@ -131,6 +131,7 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
                 // we do have that doc already!
                 // get the same json as if we got it from server
                 data = od.getData();
+                setViewData(data);      // TODO: sth doesnt work
                 //addButton.setVisibility(View.GONE);
                 //documentName.setText(data);
             } else {

@@ -33,8 +33,10 @@ import java.util.List;
 import database.DatabaseHandler;
 import database.OrderDocumentJSON;
 
+import static android.R.attr.data;
 import static android.R.attr.fragment;
 import static com.example.jakob.qrreader.R.id.container;
+import static com.example.jakob.qrreader.ReadQRActivity.DB_DATA;
 import static database.DatabaseHandler.getOrders;
 
 public class Main2Activity extends AppCompatActivity {
@@ -185,6 +187,12 @@ public class Main2Activity extends AppCompatActivity {
     // add new document - open QR reader
     public void scanCode(View view) {
         Intent intent = new Intent(this, ReadQRActivity.class);
+        startActivity(intent);
+    }
+
+
+    public void startMonitoring(View view) {
+        Intent intent = new Intent(this, MonitoringActivity.class);
         startActivity(intent);
     }
 }

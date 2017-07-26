@@ -98,11 +98,12 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
 
 
         String data = workIntent.getStringExtra("data");
-        int timeDelta = workIntent.getIntExtra("timeDelta", 120);
+        int timeDelta = workIntent.getIntExtra("timeDelta", 300);
 
         Log.v(TAG, "Starting monitor service with data " + data + timeDelta);
         String status = "Running";
 
+        /* WTF IS THIS
         JSONObject obj;
 
         // parse JSON
@@ -111,7 +112,7 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
+        */
 
 
 
