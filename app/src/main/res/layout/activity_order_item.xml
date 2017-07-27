@@ -204,7 +204,23 @@
                 android:layout_marginBottom="24dp"
                 android:gravity="center_vertical" />
 
+            <View
+                style="@style/Divider"
+                android:layout_marginStart="56dp"
+                android:layout_marginBottom="24dp"
+                android:layout_marginTop="14dp"/>
 
+            <TextView
+                android:id="@+id/textView_measurements_raw"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                android:text="Measurements"
+                android:drawableLeft="@drawable/ic_insert_comment_black_24px"
+                android:drawableTint="@color/colorPrimary"
+                android:drawablePadding="32dp"
+                android:layout_marginBottom="24dp"
+                android:gravity="center_vertical" />
 
             <Button
                 android:id="@+id/button_add_item"

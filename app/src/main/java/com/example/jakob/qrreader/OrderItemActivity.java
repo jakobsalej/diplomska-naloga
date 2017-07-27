@@ -61,9 +61,10 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
     private CollapsingToolbarLayout collapsingToolbarLayout;
     private ProgressDialog pd;
     private TextView senderTextView, senderDetailTextView, receiverTextView, receiverDetailTextView,
-    statusTextView, dateTextView, vehicleTextView, textTextView;
+    statusTextView, dateTextView, vehicleTextView, textTextView, measurementsTextView;
     private String data;
     private int startIndex;
+    private JSONObject loc1, loc2;
     private OrderDocumentJSON od;
 
 
@@ -87,6 +88,7 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
         dateTextView = (TextView) findViewById(R.id.textView_date);
         vehicleTextView = (TextView) findViewById(R.id.textView_vehicleType);
         textTextView = (TextView) findViewById(R.id.textView_text);
+        measurementsTextView = (TextView) findViewById(R.id.textView_measurements_raw);
         addBtn = (Button) findViewById(R.id.button_add_item);
 
         // save data to local DB when user clicks ADD
@@ -119,8 +121,12 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
             String odJSON = intent.getStringExtra("item");
             od = (new Gson().fromJson(odJSON, OrderDocumentJSON.class));
             Log.v("DISPLAYDATA", "object " + od.toString());
+            measurementsTextView.setText(od.getMeasurements());
 
-            setViewData(odJSON);
+            if (data != null) {
+                setViewData(data);
+            }
+
 
             //addButton.setVisibility(View.GONE);
             //documentName.setText(data);
@@ -130,7 +136,6 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
             if (od != null) {
                 // we do have that doc already!
                 // get the same json as if we got it from server
-                data = od.getData();
                 setViewData(data);      // TODO: sth doesnt work
                 //addButton.setVisibility(View.GONE);
                 //documentName.setText(data);
@@ -224,6 +229,9 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.fragment_holder, fragment).commit();
 
+            // measurements
+            //measurementsTextView.setText(obj.toString());
+
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -259,6 +267,10 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
                 e.printStackTrace();
             }
 
+        } else {
+            Log.v("MAP", "not ready yet");
+            loc1 = startLoc;
+            loc2 = endLoc;
         }
     }
 
@@ -300,6 +312,11 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
         // Add a marker in Ljubljana as a starting point and move the camera
         LatLng ljubljana = new LatLng(46.0569, 14.5058);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(ljubljana));
+
+        // if loc1 / loc2 are not null, value was assigned to them as map wasn't ready yet
+        if (loc1 != null && loc2 != null) {
+            setMapMarkers(loc1, loc2);
+        }
     }
 
 
