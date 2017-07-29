@@ -21,7 +21,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     // app's database for storing data we want to retain during reopening
 
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 10;
+    public static final int DATABASE_VERSION = 13;
     public static final String DATABASE_NAME = "db";
     private static final String TAG = "DatabaseHandler";
 
@@ -102,6 +102,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(OrderDocumentJSONEntry.COLUMN_NAME_MEASUREMENTS, od.getMeasurements());
         values.put(OrderDocumentJSONEntry.COLUMN_NAME_END_INDEX, od.getEndIndex());
+        values.put(OrderDocumentJSONEntry.COLUMN_NAME_STATUS, od.getStatus());
 
         // Inserting Row
         SQLiteDatabase db = Main2Activity.db;
@@ -165,15 +166,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             do {
                 Log.v("DATABASE", String.valueOf(cursor));
-                /*
-                OrderDocumentJSON od = new OrderDocumentJSON();
-                od.setId(cursor.getInt(0));
-                od.setTitle(cursor.getString(1));
-                od.setData(cursor.getString(2));
-                od.setStatus(cursor.getInt(3));
-                od.setDelivered(cursor.getInt(4));
-                */
-                //Log.v("DATABASEALL", cursor.getString(0) + ' ' + cursor.getString(1) + ' ' + cursor.getString(2));
 
                 // create new object
                 OrderDocumentJSON od = new OrderDocumentJSON(

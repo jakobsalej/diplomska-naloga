@@ -35,11 +35,18 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 
+import database.DatabaseHandler;
+import database.OrderDocument;
+import database.OrderDocumentJSON;
+
 import static android.R.attr.data;
+import static android.R.attr.order;
 import static android.R.attr.start;
+import static database.DatabaseHandler.getOrders;
 
 
 /**
@@ -354,9 +361,32 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
     public void onDestroy() {
         super.onDestroy();
         Log.v(TAG, "Stopping service!");
+
+        // save measurements
+        saveMeasurements();
+
         mGoogleApiClient.disconnect();
         serviceRunning = false;
         // TODO: send Broadcast to view, so we know background activity stopped
+    }
+
+    private void saveMeasurements() {
+
+        int endIndex = getMeasurementsLength();
+
+        // get all still active (='in progress') orderDocuments from local DB and add measurements' subarray
+        int status = 1;
+        int doneStatus = 2;
+        ArrayList<OrderDocumentJSON> orders = DatabaseHandler.getOrders(status);
+        Log.v("ORDERS", String.valueOf(orders.size()));
+        for(OrderDocumentJSON ord : orders) {
+            int startIndex = ord.getStartIndex();
+            ord.setEndIndex(endIndex);
+            ord.setMeasurements(getMeasurements(startIndex, endIndex).toString());
+            ord.setStatus(doneStatus);
+            DatabaseHandler.updateOrder(ord);       // UPDATE
+
+        }
     }
 
 }

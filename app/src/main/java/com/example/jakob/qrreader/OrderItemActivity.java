@@ -54,7 +54,7 @@ import static com.example.jakob.qrreader.ReadQRActivity.DB_DATA;
 
 public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCallback, CommonItemFragment.OnFragmentInteractionListener {
 
-    String BASE_URL = "https://diploma-server-rest.herokuapp.com/api/documents/";
+    String BASE_URL = "https://diploma-server-rest.herokuapp.com/api/orders/";
 
     private Button addBtn;
     private GoogleMap mMap;
@@ -95,7 +95,7 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
         addBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (data != null) {
-                    saveToDB(data);
+                    onAddClick();
                 }
             }
         });
@@ -163,7 +163,7 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
             senderDetailTextView.setText(detailsSender);
 
             // receiver
-            JSONObject receiver = obj.getJSONObject("customer");
+            JSONObject receiver = obj.getJSONObject("receiver");
             String receiverName = receiver.getString("name");
             String detailsReceiver = concatAddress(receiver.getJSONObject("address"));
             receiverTextView.setText(receiverName);
@@ -201,7 +201,7 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
             vehicleTextView.setText(vehicleTypeStr);
 
             // date
-            String date = obj.getString("dateDeadline");
+            String date = obj.getString("date");
             // TODO: parse date
             SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
             parser.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -390,8 +390,6 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
             setViewData(data);
 
             //saveToDB(data);
-
-            // TODO: parse JSON and display data
         }
     }
 
@@ -409,25 +407,32 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
         try {
             obj = new JSONObject(data);
             Log.v("OBJECT", obj.toString());
-            int id = obj.getInt("documentID");
+            int id = obj.getInt("orderID");
             String title = obj.getString("title");
             int status = obj.getInt("status");
-            int delivered = obj.getInt("successfullyDelivered");
-            String customer = obj.getJSONObject("customer").getString("name");
+
+            // change status to 'in progress'
+            if (status == 0) {
+                status = 1;
+            }
+
+            int vehicleTypeRequired = obj.getInt("vehicleTypeRequired");        // TODO: show warning if vehicle type is different than required
+            String date = obj.getString("date");
             String startLocation = obj.getJSONObject("startLocation").getString("x") + ","
                     + obj.getJSONObject("startLocation").getString("y");
             String endLocation = obj.getJSONObject("endLocation").getString("x") + ","
                     + obj.getJSONObject("endLocation").getString("y");
             double minTemp = 0;         // TODO: get it from DB
             double maxTemp = 10;        // TODO: get it from DB
-            String measurements = String.valueOf(startIndex);  // save index.. TODO: separate field?
+            int delivered = 0;          // when we add it, its not yet delivered
+            String measurements = null;
             OrderDocumentJSON  odj = new OrderDocumentJSON(
                     id,
                     title,
                     data,
                     status,
                     delivered,
-                    customer,
+                    date,
                     startLocation,
                     endLocation,
                     minTemp,
@@ -444,18 +449,16 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
-        // set toolbar title
-        // TODO: set correct title also onResume()
-
-        //Gson gson = new Gson();
-        //OrderDocumentJSON od = gson.fromJson(data, OrderDocumentJSON.class);
-        // TODO: instead of creating object, try saving raw JSON directly as a blob to db? or as string
-        // https://stackoverflow.com/questions/16603621/how-to-store-json-object-in-sqlite-database
     }
 
 
     public void onAddClick() {
-        saveToDB(data);
+        saveToDB(data);     // TODO: this should not be on main thread?
+        Intent intent = new Intent(this, Main2Activity.class);
+
+        // clear back button stack
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+
     }
 }
