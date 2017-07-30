@@ -78,31 +78,10 @@ public class Main2Activity extends AppCompatActivity {
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
 
-        // set icons and text
-        /*
-        tabLayout.getTabAt(0).setCustomView(R.layout.tab_layout_icon);
-        View tab1View = tabLayout.getTabAt(0).getCustomView();
-        TextView tab1Text = (TextView) tab1View.findViewById(R.id.tabText);
-        tab1Text.setText("ONGOING");
-        ImageView tab1Image = (ImageView) tab1View.findViewById(R.id.tabIcon);
-        tab1Image.setImageResource(R.drawable.ic_local_shipping_white_36px);
-        */
-
         // set icons
         tabLayout.getTabAt(0).setIcon(R.drawable.ic_local_shipping_white_36px);
         tabLayout.getTabAt(1).setIcon(R.drawable.ic_check_circle_white_24px);
         tabLayout.getTabAt(2).setIcon(R.drawable.ic_history_white_24px);
-
-        /*
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-        */
     }
 
 

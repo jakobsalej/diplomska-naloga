@@ -39,6 +39,9 @@ public class MainTabFragment extends Fragment{
     private RecyclerAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     public static SQLiteDatabase db;
+    private ArrayList<OrderDocumentJSON> dbData;
+    private int position;
+    private boolean updateDB = true;
 
     public MainTabFragment() {
         // Required empty public constructor
@@ -61,8 +64,11 @@ public class MainTabFragment extends Fragment{
 
         // get DB data
         final Bundle args = getArguments();
-        int position = args.getInt("position");
-        ArrayList<OrderDocumentJSON> dbData = getDataFromDB(position);
+        position = args.getInt("position");
+        dbData = getDataFromDB(position);
+
+        // dont get new data on onResume
+        updateDB = false;
 
         // recycler view
         mRecyclerView = (RecyclerView) view.findViewById(R.id.ongoing_recycler_view);
@@ -82,6 +88,22 @@ public class MainTabFragment extends Fragment{
         mRecyclerView.setAdapter(mAdapter);
 
         return view;
+    }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // get new data from db
+        if (updateDB) {
+            dbData.clear();
+            dbData.addAll(getDataFromDB(position));
+            mAdapter.notifyDataSetChanged();
+        }
+
+        // enable getting new data from DB
+        updateDB = true;
     }
 
 

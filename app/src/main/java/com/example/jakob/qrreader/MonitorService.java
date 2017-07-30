@@ -384,7 +384,8 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
             ord.setEndIndex(endIndex);
             ord.setMeasurements(getMeasurements(startIndex, endIndex).toString());
             ord.setStatus(doneStatus);
-            DatabaseHandler.updateOrder(ord);       // UPDATE
+            int res = DatabaseHandler.updateOrder(ord);       // UPDATE
+            Log.v("UPDATE", String.valueOf(res));
 
         }
     }
