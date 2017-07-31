@@ -21,7 +21,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     // app's database for storing data we want to retain during reopening
 
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 17;
+    public static final int DATABASE_VERSION = 25;
     public static final String DATABASE_NAME = "db";
     private static final String TAG = "DatabaseHandler";
 
@@ -99,16 +99,25 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public static int updateOrder(OrderDocumentJSON od) {
 
         Log.v(TAG, "Updating order document " + od.toString());
+        Log.v(TAG, "MMMM " + od.getMeasurements());
         ContentValues values = new ContentValues();
         values.put(OrderDocumentJSONEntry.COLUMN_NAME_MEASUREMENTS, od.getMeasurements());
+        values.put(OrderDocumentJSONEntry.COLUMN_NAME_START_INDEX, od.getStartIndex());
         values.put(OrderDocumentJSONEntry.COLUMN_NAME_END_INDEX, od.getEndIndex());
         values.put(OrderDocumentJSONEntry.COLUMN_NAME_STATUS, od.getStatus());
+        values.put(OrderDocumentJSONEntry.COLUMN_NAME_DATA, od.getData());
 
         // Inserting Row
         SQLiteDatabase db = Main2Activity.db;
-        return db.update(OrderDocumentJSONEntry.TABLE_NAME, values,
+        db.beginTransaction();
+        int updatedRows = db.update(OrderDocumentJSONEntry.TABLE_NAME, values,
                 OrderDocumentJSONEntry.COLUMN_NAME_ID + " = ?",
                 new String[] { String.valueOf(od.getId()) });
+
+        db.setTransactionSuccessful();
+        db.endTransaction();
+
+        return updatedRows;
     }
 
 
@@ -165,8 +174,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         if (cursor.moveToFirst()) {
             do {
-                Log.v("DATABASE", String.valueOf(cursor));
-
                 // create new object
                 OrderDocumentJSON od = new OrderDocumentJSON(
                         cursor.getInt(0),
@@ -183,9 +190,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                         cursor.getInt(11),
                         cursor.getInt(12)
                 );
+                Log.v("DATABASE", od.toString());
                 odList.add(od);
             } while (cursor.moveToNext());
         }
+
+
 
         return odList;
     }

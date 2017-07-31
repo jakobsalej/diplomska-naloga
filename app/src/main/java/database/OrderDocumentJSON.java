@@ -3,6 +3,9 @@ package database;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.Serializable;
 
 import static android.R.attr.name;
@@ -186,6 +189,27 @@ public class OrderDocumentJSON implements Serializable
     @Override
     public String toString() {
         return "OrderDocumentJSON [id = "+id+", title = "+title+", delivered = "+delivered+", status = "+status+", data = "+data+", maxTemp = "+maxTemp+", measurements = "+measurements+", endLocation = "+endLocation+", startLocation = "+startLocation+", minTemp = "+minTemp+", date = "+date+", startIndex = "+startIndex+", endIndex = "+endIndex+"]";
+    }
+
+    public void setNewJSONValue(String field, String value, int type) {
+
+        // update field in JSON
+        try {
+            JSONObject obj = new JSONObject(this.data);
+
+            // type: 0 = String, 1 = int
+            if (type == 0) {
+                obj.put(field, value);
+            } else if (type == 1) {
+                int val = Integer.parseInt(value);
+                obj.put(field, val);
+            }
+
+            this.data = obj.toString();
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
 }

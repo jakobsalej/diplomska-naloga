@@ -197,8 +197,8 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
         // TODO: add measurement units
         // TODO: do this in setLastValues()?
 
-        time = (TextView) findViewById(R.id.textView_time_latest_value);
-        time.setText(MonitorService.lastTime);
+        //time = (TextView) findViewById(R.id.textView_time_latest_value);
+        //time.setText(MonitorService.lastTime.toString());
 
         temp = (TextView) findViewById(R.id.textView_temp_value);
         temp.setText(Double.toString(MonitorService.lastTemp));
@@ -268,7 +268,7 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
     
     private void setLastValues(boolean serviceRunning, String lastTime, double lastLat, double lastLong, double lastTemp, double lastHumidity, double lastPressure) {
         // TODO: also set service running??
-        time.setText(lastTime);
+        //time.setText(lastTime);
         temp.setText(Double.toString(lastTemp));
         humidity.setText(Double.toString(lastHumidity));
         pressure.setText(Double.toString(lastPressure));

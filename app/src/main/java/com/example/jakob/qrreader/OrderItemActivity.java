@@ -119,9 +119,11 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
         // if it's details view, hide 'Add' button and don't get new data from API
         if (detailsView) {
             String odJSON = intent.getStringExtra("item");
+            Log.v("DISPLAYDATA", odJSON);
             od = (new Gson().fromJson(odJSON, OrderDocumentJSON.class));
             Log.v("DISPLAYDATA", "object " + od.toString());
             measurementsTextView.setText(od.getMeasurements());
+            //Log.v("MM", od.getMeasurements());
 
             if (data != null) {
                 setViewData(data);
@@ -230,7 +232,7 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
                     .add(R.id.fragment_holder, fragment).commit();
 
             // measurements
-            //measurementsTextView.setText(obj.toString());
+            measurementsTextView.setText(obj.getString("transport"));
 
 
         } catch (JSONException e) {
@@ -411,9 +413,13 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
             String title = obj.getString("title");
             int status = obj.getInt("status");
 
-            // change status to 'in progress'
+            // change status to 'in progress' && update value in JSON
+            int newStatus = 1;      // In progress
             if (status == 0) {
-                status = 1;
+                status = newStatus;
+                obj.put("status", newStatus);
+                // TODO: send updated JSON to server
+                data = obj.toString();
             }
 
             int vehicleTypeRequired = obj.getInt("vehicleTypeRequired");        // TODO: show warning if vehicle type is different than required
@@ -425,7 +431,7 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
             double minTemp = 0;         // TODO: get it from DB
             double maxTemp = 10;        // TODO: get it from DB
             int delivered = 0;          // when we add it, its not yet delivered
-            String measurements = null;
+            String measurements = "measurements placeholder";
             OrderDocumentJSON  odj = new OrderDocumentJSON(
                     id,
                     title,

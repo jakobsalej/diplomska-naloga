@@ -62,14 +62,14 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
     public GoogleApiClient mGoogleApiClient;
     public Location mLastLocation;
     public LocationRequest mLocationRequest;
-    public String mLastUpdateTime;
+    public Date mLastUpdateTime;
     public String mLastWeatherUpdate;
     public int locationInterval;
     private RequestQueue reQueue;
     private String weatherAppID = "126cb0f7fc8884208c5178d70cac7bea";
     private static JSONArray dataJSON = new JSONArray();
     public static boolean serviceRunning = false;
-    public static String lastTime;
+    public static Date lastTime;
     public static double lastTemp;
     public static double lastHumidity;
     public static double lastPressure;
@@ -241,7 +241,8 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
     @Override
     public void onLocationChanged(Location location) {
         mLastLocation = location;
-        mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
+        //mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
+        mLastUpdateTime = new Date();
         Log.v(TAG, "Getting new location!" + String.valueOf(location) + " " + mLastUpdateTime);
 
         // getting weather data
@@ -250,7 +251,7 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
 
 
 
-    public void getWeatherData(final Location location, final String updateTime) {
+    public void getWeatherData(final Location location, final Date updateTime) {
 
         // get coordinates
         double lat = Double.parseDouble(String.valueOf(location.getLatitude()));
@@ -287,7 +288,7 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
     }
 
 
-    private void updateLastValues(String weather, Location location, String updateTime) {
+    private void updateLastValues(String weather, Location location, Date updateTime) {
         // update view activity with latest values
         lastTime = updateTime;
         lastLat = location.getLatitude();
@@ -318,11 +319,11 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
     }
 
 
-    private void addDataToJSON(String weatherData, Location locationData, String updateTime) {
+    private void addDataToJSON(String weatherData, Location locationData, Date updateTime) {
         // new JSON object
         JSONObject dataObj = new JSONObject();
         try {
-            dataObj.put("time", mLastUpdateTime);
+            dataObj.put("time", mLastUpdateTime.getTime());
             dataObj.put("location", mLastLocation);
             dataObj.put("weather", weatherData);
         } catch (JSONException e) {
@@ -372,6 +373,7 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
 
     private void saveMeasurements() {
 
+        long endTime = new Date().getTime();
         int endIndex = getMeasurementsLength();
 
         // get all still active (='in progress') orderDocuments from local DB and add measurements' subarray
@@ -382,12 +384,65 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
         for(OrderDocumentJSON ord : orders) {
             int startIndex = ord.getStartIndex();
             ord.setEndIndex(endIndex);
-            ord.setMeasurements(getMeasurements(startIndex, endIndex).toString());
-            ord.setStatus(doneStatus);
-            int res = DatabaseHandler.updateOrder(ord);       // UPDATE
-            Log.v("UPDATE", String.valueOf(res));
+            JSONArray measurements = getMeasurements(startIndex, endIndex);
 
+            // get startTime from the first measurement
+            long startTime = 0;
+            if (measurements.length() > 0) {
+                try {
+                    startTime = measurements.getJSONObject(0).getLong("time");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            // update status + also update values in JSON string 'data'
+            ord.setStatus(doneStatus);
+            ord.setNewJSONValue("status", String.valueOf(doneStatus), 1);
+
+            // TODO: set this somehow
+            int delivered = 1;
+
+            // create new object transport
+            JSONObject tr = addNewTransportObject(ord.getId(), measurements, "alerts placeholder", startTime, endTime, delivered);
+            ord.setMeasurements(tr.toString());
+            //ord.setNewJSONValue("transport", tr.toString(), 0);
+
+            Log.v("Measurements", ord.getMeasurements());
+
+            // TODO: create new transport entry, get it's id and save it to 'transport' field in json
+
+            int res = DatabaseHandler.updateOrder(ord);       // UPDATE
         }
+    }
+
+    private JSONObject addNewTransportObject(Integer id, JSONArray measurements, String alerts, long startTime, long endTime, int delivered) {
+
+        // calculate duration in hours
+        long duration = (endTime - startTime) / (60 * 60 * 1000) % 24;
+
+
+        JSONObject tr = new JSONObject();
+        try {
+            tr.put("idOrder", id);
+            tr.put("measurements", measurements);
+            tr.put("alerts", alerts);
+            tr.put("startDate", startTime);
+            tr.put("endDate", endTime);
+            tr.put("delivered", delivered);
+            tr.put("duration", duration);
+
+            // TODO: get from settings
+            tr.put("vehicleType", 0);
+            tr.put("vehicleReg", "LJ-B672");
+            tr.put("driverID", 1);
+            tr.put("text", "Customer was nice and friendly!");
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return tr;
     }
 
 }

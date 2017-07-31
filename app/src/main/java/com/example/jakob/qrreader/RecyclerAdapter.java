@@ -53,6 +53,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemHo
             // TODO: start details intent when user clicks on one of the items
 
             // convert object to string to pass it to another activity
+            Log.v("AA", mItem.getMeasurements());
+            Log.v("AA", mItem.toString());
             String odJSON = (new Gson().toJson(mItem));
 
             Context context = itemView.getContext();
