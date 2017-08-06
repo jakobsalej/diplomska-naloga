@@ -7,7 +7,6 @@ import android.view.View;
 import android.widget.TextView;
 
 import static android.icu.lang.UCharacter.GraphemeClusterBreak.T;
-import static com.example.jakob.qrreader.ReadQRActivity.DB_DATA;
 
 public class MainActivity extends AppCompatActivity {
 

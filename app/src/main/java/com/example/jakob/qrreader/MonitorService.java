@@ -44,8 +44,10 @@ import database.OrderDocument;
 import database.OrderDocumentJSON;
 
 import static android.R.attr.data;
+import static android.R.attr.logo;
 import static android.R.attr.order;
 import static android.R.attr.start;
+import static android.media.CamcorderProfile.get;
 import static database.DatabaseHandler.getOrders;
 
 
@@ -68,6 +70,7 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
     private RequestQueue reQueue;
     private String weatherAppID = "126cb0f7fc8884208c5178d70cac7bea";
     private static JSONArray dataJSON = new JSONArray();
+    private static JSONArray alerts = new JSONArray();
     public static boolean serviceRunning = false;
     public static Date lastTime;
     public static double lastTemp;
@@ -322,8 +325,9 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
     private void addDataToJSON(String weatherData, Location locationData, Date updateTime) {
         // new JSON object
         JSONObject dataObj = new JSONObject();
+        long currentTime = mLastUpdateTime.getTime();
         try {
-            dataObj.put("time", mLastUpdateTime.getTime());
+            dataObj.put("time", currentTime);
             dataObj.put("location", mLastLocation);
             dataObj.put("weather", weatherData);
         } catch (JSONException e) {
@@ -336,6 +340,48 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
         dataJSON.put(dataObj);
         //Log.v(TAG, String.valueOf(dataJSON));
         Log.v(TAG, "Array length: " +  dataJSON.length());
+
+        // check temperatures for alerts for alerts
+        Log.v("TEMPS", weatherData);
+        // TODO: clean the output of weather / locaton...
+        // TODO: get actual measured temp
+        validateTemperatures(22.4, currentTime, mLastLocation);
+
+    }
+
+
+    private void validateTemperatures(double value, long currentTime, Location location) {
+        for (int i = 0; i < alerts.length(); i++) {
+            try {
+                boolean addAlert = true;
+                String alertMsg = "";
+                JSONObject alert = (JSONObject) alerts.get(i);
+                if (value < alert.getDouble("minTemp")) {
+                    alertMsg = "Warning! Temperature is too low (recommended: " + alert.getDouble("minTemp") + ", measured: " + value + ")";
+                } else if (value > alert.getDouble("maxTemp")) {
+                    alertMsg = "Warning! Temperature is too high (recommended: " + alert.getDouble("maxTemp") + ", measured: " + value + ")";
+                } else {
+                    // everything is great!
+                    addAlert = false;
+                }
+
+                if (addAlert) {
+                    // create new Alert object and add it to order's alert list
+                    JSONObject newAlertMsg = new JSONObject();
+                    newAlertMsg.put("message", alertMsg);
+                    newAlertMsg.put("time", currentTime);
+                    newAlertMsg.put("location", location);
+                    newAlertMsg.put("measurementValue", value);
+                    alert.getJSONArray("alerts").put(newAlertMsg);
+
+                    // TODO: show notification
+
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 
@@ -400,11 +446,14 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
             ord.setStatus(doneStatus);
             ord.setNewJSONValue("status", String.valueOf(doneStatus), 1);
 
-            // TODO: set this somehow
+            // get alerts for this order
+            JSONArray alertMsgs = getAlertMessages(ord.getId());
+
+            // TODO: set this somehow (was it successfully delivered?)
             int delivered = 1;
 
             // create new object transport
-            JSONObject tr = addNewTransportObject(ord.getId(), measurements, "alerts placeholder", startTime, endTime, delivered);
+            JSONObject tr = addNewTransportObject(ord.getId(), measurements, alertMsgs.toString(), startTime, endTime, delivered);
             ord.setMeasurements(tr.toString());
             //ord.setNewJSONValue("transport", tr.toString(), 0);
 
@@ -414,6 +463,19 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
 
             int res = DatabaseHandler.updateOrder(ord);       // UPDATE
         }
+    }
+
+    private JSONArray getAlertMessages(Integer id) {
+        for (int i = 0; i < alerts.length(); i++) {
+            try {
+                if (alerts.getJSONObject(i).getInt("id") == id) {
+                    return (JSONArray) alerts.getJSONObject(i).get("alerts");
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 
     private JSONObject addNewTransportObject(Integer id, JSONArray measurements, String alerts, long startTime, long endTime, int delivered) {
@@ -443,6 +505,12 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
         }
 
         return tr;
+    }
+
+
+    public static void addAlertsArray(JSONObject obj) {
+        alerts.put(obj);
+        Log.v("ALERTS", obj.toString());
     }
 
 }

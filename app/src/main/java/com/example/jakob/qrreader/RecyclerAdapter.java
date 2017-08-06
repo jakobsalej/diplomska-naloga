@@ -15,7 +15,6 @@ import java.util.ArrayList;
 
 import database.OrderDocumentJSON;
 
-import static com.example.jakob.qrreader.ReadQRActivity.DB_DATA;
 
 /**
  * Created by jakob on 7/4/17.
@@ -43,7 +42,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemHo
         public void bindItem(OrderDocumentJSON od) {
             mItem = od;
             mItemTitle.setText(od.getTitle());
-            mItemText.setText(od.getCustomer());
+            mItemText.setText(od.getDate());
         }
 
         @Override
@@ -53,16 +52,15 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemHo
             // TODO: start details intent when user clicks on one of the items
 
             // convert object to string to pass it to another activity
-            Log.v("AA", mItem.getMeasurements());
-            Log.v("AA", mItem.toString());
+            mItem.printValues();
+            //Log.v("AA", mItem.toString());
             String odJSON = (new Gson().toJson(mItem));
 
             Context context = itemView.getContext();
             Intent showItemIntent = new Intent(context, OrderItemActivity.class);
-            showItemIntent.putExtra(DB_DATA, mItem.getData());
-            showItemIntent.putExtra("item_details", true);
-            showItemIntent.putExtra("item", odJSON);
-            showItemIntent.putExtra("startIndex", mItem.getStartIndex());
+            showItemIntent.putExtra("isData", true);
+            showItemIntent.putExtra("data", mItem.getData());
+            showItemIntent.putExtra("measurements", mItem.getMeasurements());
             context.startActivity(showItemIntent);
 
 

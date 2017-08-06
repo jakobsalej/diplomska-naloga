@@ -27,7 +27,6 @@ import java.io.IOException;
 
 public class ReadQRActivity extends AppCompatActivity {
 
-    public static final String DB_DATA = "com.example.myfirstapp.DB_DATA";
     private static int first = 0;
 
     @Override
@@ -96,12 +95,12 @@ public class ReadQRActivity extends AppCompatActivity {
             @Override
             public void receiveDetections(Detector.Detections<Barcode> detections) {
                 final SparseArray<Barcode> barcodes = detections.getDetectedItems();
-                Log.v("QR", "New detection!");
 
                 if (barcodes.size() != 0 && first == 0) {
                     first = 1;
                     Intent intent = new Intent(getBaseContext(), OrderItemActivity.class);
-                    intent.putExtra(DB_DATA, barcodes.valueAt(0).displayValue);
+                    intent.putExtra("isData", false);
+                    intent.putExtra("id", barcodes.valueAt(0).displayValue);
                     startActivity(intent);
                 }
             }
@@ -134,7 +133,8 @@ public class ReadQRActivity extends AppCompatActivity {
 
         // only start new activity if there is some data in edit field
         if (data.length() > 0) {
-            intent.putExtra(DB_DATA, data);
+            intent.putExtra("isData", false);
+            intent.putExtra("id", data);
             startActivity(intent);
         }
     }

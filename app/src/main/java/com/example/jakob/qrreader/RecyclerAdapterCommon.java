@@ -19,7 +19,6 @@ import java.util.ArrayList;
 
 import database.OrderDocumentJSON;
 
-import static com.example.jakob.qrreader.ReadQRActivity.DB_DATA;
 
 /**
  * Created by jakob on 23.7.2017.

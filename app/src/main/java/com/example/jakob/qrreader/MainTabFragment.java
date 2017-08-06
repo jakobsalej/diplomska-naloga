@@ -29,6 +29,7 @@ import database.DatabaseHandler;
 import database.OrderDocument;
 import database.OrderDocumentJSON;
 
+import static android.R.attr.order;
 import static android.os.Build.VERSION_CODES.M;
 import static database.DatabaseHandler.getOrders;
 
@@ -40,6 +41,7 @@ public class MainTabFragment extends Fragment{
     private RecyclerView.LayoutManager mLayoutManager;
     public static SQLiteDatabase db;
     private ArrayList<OrderDocumentJSON> dbData;
+    public static ArrayList<JSONObject> temperaturesData;
     private int position;
     private boolean updateDB = true;
 
@@ -67,7 +69,12 @@ public class MainTabFragment extends Fragment{
         position = args.getInt("position");
         dbData = getDataFromDB(position);
 
-        // dont get new data on onResume
+        // get temperature limits
+        if (position == 1) {
+            temperaturesData = getTempLimits(dbData);
+        }
+
+        // dont get new data on onResume the first time (we already got data from onCreate)
         updateDB = false;
 
         // recycler view
@@ -91,6 +98,28 @@ public class MainTabFragment extends Fragment{
     }
 
 
+    private ArrayList<JSONObject> getTempLimits(ArrayList<OrderDocumentJSON> dbData) {
+
+        ArrayList<JSONObject> tempLimits = new ArrayList<>();
+
+        for (OrderDocumentJSON order : dbData) {
+            JSONObject obj = new JSONObject();
+            try {
+                JSONArray alertsArray = new JSONArray();
+                obj.put("id", order.getId());
+                obj.put("minTemp", order.getMinTemp());
+                obj.put("maxTemp", order.getMaxTemp());
+                obj.put("alerts", alertsArray);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            tempLimits.add(obj);
+        }
+
+        return tempLimits;
+    }
+
+
     @Override
     public void onResume() {
         super.onResume();
@@ -100,6 +129,11 @@ public class MainTabFragment extends Fragment{
             dbData.clear();
             dbData.addAll(getDataFromDB(position));
             mAdapter.notifyDataSetChanged();
+
+            if (!MonitorService.serviceRunning && position == 1) {
+                // if monitor service is not running yet, also update tempLimits
+                temperaturesData = getTempLimits(dbData);
+            }
         }
 
         // enable getting new data from DB

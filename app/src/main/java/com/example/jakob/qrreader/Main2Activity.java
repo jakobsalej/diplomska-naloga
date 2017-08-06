@@ -20,24 +20,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import android.widget.ImageView;
-import android.widget.TextView;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import database.DatabaseHandler;
-import database.OrderDocumentJSON;
-
-import static android.R.attr.data;
-import static android.R.attr.fragment;
 import static com.example.jakob.qrreader.R.id.container;
-import static com.example.jakob.qrreader.ReadQRActivity.DB_DATA;
-import static database.DatabaseHandler.getOrders;
 
 public class Main2Activity extends AppCompatActivity {
 

@@ -54,7 +54,7 @@ import static android.R.attr.colorPrimary;
 import static android.R.attr.data;
 import static com.example.jakob.qrreader.MonitorService.lastLon;
 import static com.example.jakob.qrreader.R.id.map;
-import static com.example.jakob.qrreader.ReadQRActivity.DB_DATA;
+
 
 public class MonitoringActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, OnMapReadyCallback {
 
@@ -81,7 +81,7 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
         // Get the Intent that started this activity and extract the string
         Log.v(TAG, "On create!");
         Intent intent = getIntent();
-        final String data = intent.getStringExtra(DB_DATA);
+        final String data = intent.getStringExtra("data");
 
         // set location interval
         // TODO: get this from settings?

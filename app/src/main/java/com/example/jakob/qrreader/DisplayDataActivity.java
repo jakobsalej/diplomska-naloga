@@ -26,15 +26,8 @@ import java.net.URL;
 import java.util.Arrays;
 
 import database.DatabaseHandler;
-import database.Order;
-import database.OrderDocument;
 import database.OrderDocumentJSON;
 
-import static android.R.attr.order;
-import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
-import static com.example.jakob.qrreader.MonitorService.getMeasurementsLength;
-import static com.example.jakob.qrreader.ReadQRActivity.DB_DATA;
-import static database.DatabaseHandler.getOrder;
 
 public class DisplayDataActivity extends AppCompatActivity {
 
@@ -56,7 +49,7 @@ public class DisplayDataActivity extends AppCompatActivity {
 
         // Get the Intent that started this activity and extract the string
         Intent intent = getIntent();
-        data = intent.getStringExtra(DB_DATA);
+        data = intent.getStringExtra("data");
         Boolean detailsView = intent.getBooleanExtra("item_details", false);
         startIndex = intent.getIntExtra("startIndex", 0);
 
@@ -227,7 +220,7 @@ public class DisplayDataActivity extends AppCompatActivity {
 
     public void startMonitoring(View view) {
         Intent intent = new Intent(this, MonitoringActivity.class);
-        intent.putExtra(DB_DATA, data);
+        intent.putExtra("data", data);
         startActivity(intent);
     }
 

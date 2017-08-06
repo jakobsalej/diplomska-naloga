@@ -7,17 +7,11 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.CardView;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdate;
@@ -44,13 +38,15 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.TimeZone;
 
 import database.DatabaseHandler;
 import database.OrderDocumentJSON;
 
-import static com.example.jakob.qrreader.ReadQRActivity.DB_DATA;
+import static android.R.attr.order;
+
 
 public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCallback, CommonItemFragment.OnFragmentInteractionListener {
 
@@ -63,9 +59,9 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
     private TextView senderTextView, senderDetailTextView, receiverTextView, receiverDetailTextView,
     statusTextView, dateTextView, vehicleTextView, textTextView, measurementsTextView;
     private String data;
-    private int startIndex;
     private JSONObject loc1, loc2;
     private OrderDocumentJSON od;
+    public static ArrayList<JSONObject> temperaturesData;
 
 
     @Override
@@ -111,41 +107,41 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
 
         // Get the Intent that started this activity and extract the string
         Intent intent = getIntent();
-        data = intent.getStringExtra(DB_DATA);
-        Log.v("ITEM", data);
-        Boolean detailsView = intent.getBooleanExtra("item_details", false);
-        startIndex = intent.getIntExtra("startIndex", 0);
+        boolean isData = intent.getBooleanExtra("isData", false);
 
-        // if it's details view, hide 'Add' button and don't get new data from API
-        if (detailsView) {
-            String odJSON = intent.getStringExtra("item");
-            Log.v("DISPLAYDATA", odJSON);
-            od = (new Gson().fromJson(odJSON, OrderDocumentJSON.class));
-            Log.v("DISPLAYDATA", "object " + od.toString());
-            measurementsTextView.setText(od.getMeasurements());
-            //Log.v("MM", od.getMeasurements());
+        // if we get data from intent (and not just ID)
+        if (isData) {
+            data = intent.getStringExtra("data");
+            String measurementsData = intent.getStringExtra("measurements");
 
-            if (data != null) {
-                setViewData(data);
-            }
+            setViewData(data);
+            setMeasuremntsViewData(measurementsData);
 
+            // hide 'add' button - we already have it stored locally
+            addBtn.setVisibility(View.GONE);
 
-            //addButton.setVisibility(View.GONE);
-            //documentName.setText(data);
         } else {
-            // check if we have Order document with this ID already
-            OrderDocumentJSON od = DatabaseHandler.getOrder(Integer.parseInt(data));
+            String id = intent.getStringExtra("id");
+
+            // check if we already have order with that ID locally
+            OrderDocumentJSON od = DatabaseHandler.getOrder(Integer.parseInt(id));
             if (od != null) {
-                // we do have that doc already!
-                // get the same json as if we got it from server
-                setViewData(data);      // TODO: sth doesnt work
-                //addButton.setVisibility(View.GONE);
-                //documentName.setText(data);
+                // if we do, set view
+                setViewData(od.getData());
+                setMeasuremntsViewData(od.getMeasurements());
+
+                // hide 'add' button - we already have it stored locally
+                addBtn.setVisibility(View.GONE);
+
             } else {
-                // get data from API if it's not a detail view
-                new getDataFromDB().execute(BASE_URL + data);
+                // else get it from server
+                new getDataFromDB().execute(BASE_URL + id);
             }
         }
+    }
+
+    private void setMeasuremntsViewData(String measurementsData) {
+        measurementsTextView.setText(measurementsData);
     }
 
 
@@ -232,7 +228,7 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
                     .add(R.id.fragment_holder, fragment).commit();
 
             // measurements
-            measurementsTextView.setText(obj.getString("transport"));
+            //measurementsTextView.setText(obj.getString("transport"));
 
 
         } catch (JSONException e) {
@@ -384,14 +380,13 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
+
+            // show gathered data
+            data = result;
+            setViewData(data);
             if (pd.isShowing()){
                 pd.dismiss();
             }
-            //senderTextView.setText(result);
-            data = result;
-            setViewData(data);
-
-            //saveToDB(data);
         }
     }
 
@@ -401,10 +396,10 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
         // get start index (measurements length at the moment of saving to db)
         int startIndex = MonitorService.getMeasurementsLength();
         int endIndex = 0;
-        Log.v("DISPLAYDATA", "Start index is " + startIndex);
+        //Log.v("DISPLAYDATA", "Start index is " + startIndex);
 
         // parse JSON into object
-        Log.v("DISPLAYDATA", data);
+        //Log.v("DISPLAYDATA", data);
         JSONObject obj = null;
         try {
             obj = new JSONObject(data);
@@ -447,10 +442,23 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
                     startIndex,
                     endIndex
             );
-            Log.v("DISPLAYDATA", odj.toString());
+            odj.printValues();
 
             // add to DB
             DatabaseHandler.addOrder(odj);
+
+            // add entry to alertsArray (where we save alerts specific for this order)
+            JSONObject alertObj = new JSONObject();
+            try {
+                JSONArray alertsArray = new JSONArray();
+                alertObj.put("id", odj.getId());
+                alertObj.put("minTemp", odj.getMinTemp());
+                alertObj.put("maxTemp", odj.getMaxTemp());
+                alertObj.put("alerts", alertsArray);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            MonitorService.addAlertsArray(alertObj);
 
         } catch (JSONException e) {
             e.printStackTrace();

@@ -1,5 +1,7 @@
 package database;
 
+import android.util.Log;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -122,11 +124,11 @@ public class OrderDocumentJSON implements Serializable
         this.delivered = delivered;
     }
 
-    public String getCustomer() {
+    public String getDate() {
         return date;
     }
 
-    public void setCustomer(String date) {
+    public void setDate(String date) {
         this.date = date;
     }
 
@@ -189,6 +191,22 @@ public class OrderDocumentJSON implements Serializable
     @Override
     public String toString() {
         return "OrderDocumentJSON [id = "+id+", title = "+title+", delivered = "+delivered+", status = "+status+", data = "+data+", maxTemp = "+maxTemp+", measurements = "+measurements+", endLocation = "+endLocation+", startLocation = "+startLocation+", minTemp = "+minTemp+", date = "+date+", startIndex = "+startIndex+", endIndex = "+endIndex+"]";
+    }
+
+    public void printValues() {
+        Log.v("ID: ", this.getId().toString());
+        Log.v("TITLE: ", this.getTitle());
+        Log.v("DATA: ", this.getData());
+        Log.v("STATUS: ", this.getStatus().toString());
+        Log.v("DATE: ", this.getDate());
+        Log.v("START LOC: ", this.getStartLocation());
+        Log.v("END LOC: ", this.getEndLocation());
+        Log.v("MIN TEMP: ", this.getMinTemp().toString());
+        Log.v("MAX TEMP: ", this.getMaxTemp().toString());
+        Log.v("MEASUREMENTS: ", this.getMeasurements());
+        Log.v("START INDX: ", this.getStartIndex().toString());
+        Log.v("END INDX: ", this.getEndIndex().toString());
+        Log.v("DELIVERED: ", this.getDelivered().toString());
     }
 
     public void setNewJSONValue(String field, String value, int type) {

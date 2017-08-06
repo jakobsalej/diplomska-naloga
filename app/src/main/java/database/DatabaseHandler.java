@@ -21,7 +21,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     // app's database for storing data we want to retain during reopening
 
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 25;
+    public static final int DATABASE_VERSION = 32;
     public static final String DATABASE_NAME = "db";
     private static final String TAG = "DatabaseHandler";
 
@@ -31,15 +31,16 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                     OrderDocumentJSONEntry.COLUMN_NAME_TITLE + " TEXT," +
                     OrderDocumentJSONEntry.COLUMN_NAME_DATA + " TEXT," +
                     OrderDocumentJSONEntry.COLUMN_NAME_STATUS + " INTEGER," +
-                    OrderDocumentJSONEntry.COLUMN_NAME_CUSTOMER + " TEXT," +
+                    OrderDocumentJSONEntry.COLUMN_NAME_DELIVERED + " INTEGER," +
+                    OrderDocumentJSONEntry.COLUMN_NAME_DATE + " TEXT," +
                     OrderDocumentJSONEntry.COLUMN_NAME_START_LOCATION + " TEXT," +
                     OrderDocumentJSONEntry.COLUMN_NAME_END_LOCATION + " TEXT," +
                     OrderDocumentJSONEntry.COLUMN_NAME_MIN_TEMP + " DOUBLE," +
                     OrderDocumentJSONEntry.COLUMN_NAME_MAX_TEMP + " DOUBLE," +
                     OrderDocumentJSONEntry.COLUMN_NAME_MEASUREMENTS + " TEXT," +
                     OrderDocumentJSONEntry.COLUMN_NAME_START_INDEX + " INTEGER," +
-                    OrderDocumentJSONEntry.COLUMN_NAME_END_INDEX + " INTEGER," +
-                    OrderDocumentJSONEntry.COLUMN_NAME_DELIVERED + " INTEGER)";
+                    OrderDocumentJSONEntry.COLUMN_NAME_END_INDEX + " INTEGER)";
+
 
     private static final String SQL_DELETE_ENTRIES =
             "DROP TABLE IF EXISTS " + OrderDocumentJSONEntry.TABLE_NAME;
@@ -71,14 +72,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     // CREATE
     public static void addOrder(OrderDocumentJSON od) {
 
-        Log.v(TAG, "Adding order document " + od.toString());
+        Log.v(TAG, "Adding order document to DB" + od.toString());
         ContentValues values = new ContentValues();
         values.put(OrderDocumentJSONEntry.COLUMN_NAME_ID, od.getId());
         values.put(OrderDocumentJSONEntry.COLUMN_NAME_TITLE, od.getTitle());
         values.put(OrderDocumentJSONEntry.COLUMN_NAME_DATA, od.getData());
         values.put(OrderDocumentJSONEntry.COLUMN_NAME_STATUS, od.getStatus());
         values.put(OrderDocumentJSONEntry.COLUMN_NAME_DELIVERED, od.getDelivered());
-        values.put(OrderDocumentJSONEntry.COLUMN_NAME_CUSTOMER, od.getCustomer());
+        values.put(OrderDocumentJSONEntry.COLUMN_NAME_DATE, od.getDate());
         values.put(OrderDocumentJSONEntry.COLUMN_NAME_START_LOCATION, od.getStartLocation());
         values.put(OrderDocumentJSONEntry.COLUMN_NAME_END_LOCATION, od.getEndLocation());
         values.put(OrderDocumentJSONEntry.COLUMN_NAME_MIN_TEMP, od.getMinTemp());
@@ -101,11 +102,19 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         Log.v(TAG, "Updating order document " + od.toString());
         Log.v(TAG, "MMMM " + od.getMeasurements());
         ContentValues values = new ContentValues();
+        values.put(OrderDocumentJSONEntry.COLUMN_NAME_ID, od.getId());
+        values.put(OrderDocumentJSONEntry.COLUMN_NAME_TITLE, od.getTitle());
+        values.put(OrderDocumentJSONEntry.COLUMN_NAME_DATA, od.getData());
+        values.put(OrderDocumentJSONEntry.COLUMN_NAME_STATUS, od.getStatus());
+        values.put(OrderDocumentJSONEntry.COLUMN_NAME_DELIVERED, od.getDelivered());
+        values.put(OrderDocumentJSONEntry.COLUMN_NAME_DATE, od.getDate());
+        values.put(OrderDocumentJSONEntry.COLUMN_NAME_START_LOCATION, od.getStartLocation());
+        values.put(OrderDocumentJSONEntry.COLUMN_NAME_END_LOCATION, od.getEndLocation());
+        values.put(OrderDocumentJSONEntry.COLUMN_NAME_MIN_TEMP, od.getMinTemp());
+        values.put(OrderDocumentJSONEntry.COLUMN_NAME_MAX_TEMP, od.getMaxTemp());
         values.put(OrderDocumentJSONEntry.COLUMN_NAME_MEASUREMENTS, od.getMeasurements());
         values.put(OrderDocumentJSONEntry.COLUMN_NAME_START_INDEX, od.getStartIndex());
         values.put(OrderDocumentJSONEntry.COLUMN_NAME_END_INDEX, od.getEndIndex());
-        values.put(OrderDocumentJSONEntry.COLUMN_NAME_STATUS, od.getStatus());
-        values.put(OrderDocumentJSONEntry.COLUMN_NAME_DATA, od.getData());
 
         // Inserting Row
         SQLiteDatabase db = Main2Activity.db;
@@ -129,9 +138,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         Log.v("DB query", selectQuery);
         Cursor cursor = db.rawQuery(selectQuery, null);
 
-        //Cursor cursor =  db.query(OrderDocumentJSONEntry.TABLE_NAME, new String[] { " * " }, OrderDocumentJSONEntry.COLUMN_NAME_ID + "=?",
-        //        new String[] { String.valueOf(id) }, null, null, null, null);
-
         if (!cursor.moveToFirst()) {
             Log.v("DB", "No entry with such ID to get!");
             return null;
@@ -139,20 +145,22 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         // create new object
         OrderDocumentJSON od = new OrderDocumentJSON(
-                        cursor.getInt(0),
-                        cursor.getString(1),
-                        cursor.getString(2),
-                        cursor.getInt(3),
-                        cursor.getInt(4),
-                        cursor.getString(5),
-                        cursor.getString(6),
-                        cursor.getString(7),
-                        cursor.getDouble(8),
-                        cursor.getDouble(9),
-                        cursor.getString(10),
-                        cursor.getInt(11),
-                        cursor.getInt(12)
+                        cursor.getInt(0),           // id
+                        cursor.getString(1),        // title
+                        cursor.getString(2),        // data
+                        cursor.getInt(3),           // status
+                        cursor.getInt(4),           // delivered
+                        cursor.getString(5),        // date
+                        cursor.getString(6),        // startLocation
+                        cursor.getString(7),        // endLocation
+                        cursor.getDouble(8),        // minTemp
+                        cursor.getDouble(9),        // maxTemp
+                        cursor.getString(10),       // measurements
+                        cursor.getInt(11),          // startIndex
+                        cursor.getInt(12)           // endIndex
         );
+        Log.v("DB", "Getting one order!");
+        od.printValues();
         return od;
 
     }
@@ -176,19 +184,19 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             do {
                 // create new object
                 OrderDocumentJSON od = new OrderDocumentJSON(
-                        cursor.getInt(0),
-                        cursor.getString(1),
-                        cursor.getString(2),
-                        cursor.getInt(3),
-                        cursor.getInt(4),
-                        cursor.getString(5),
-                        cursor.getString(6),
-                        cursor.getString(7),
-                        cursor.getDouble(8),
-                        cursor.getDouble(9),
-                        cursor.getString(10),
-                        cursor.getInt(11),
-                        cursor.getInt(12)
+                        cursor.getInt(0),           // id
+                        cursor.getString(1),        // title
+                        cursor.getString(2),        // data
+                        cursor.getInt(3),           // status
+                        cursor.getInt(4),           // delivered
+                        cursor.getString(5),        // date
+                        cursor.getString(6),        // startLocation
+                        cursor.getString(7),        // endLocation
+                        cursor.getDouble(8),        // minTemp
+                        cursor.getDouble(9),        // maxTemp
+                        cursor.getString(10),       // measurements
+                        cursor.getInt(11),          // startIndex
+                        cursor.getInt(12)           // endIndex
                 );
                 Log.v("DATABASE", od.toString());
                 odList.add(od);
