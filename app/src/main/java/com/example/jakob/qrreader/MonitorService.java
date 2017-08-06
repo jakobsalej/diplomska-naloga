@@ -1,6 +1,9 @@
 package com.example.jakob.qrreader;
 
 import android.app.IntentService;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
@@ -8,6 +11,8 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -61,6 +66,7 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
     public static final String ACTION = "com.example.jakob.qrreader.MonitorService";
     private static final String TAG = "MonitorService";
     private static final int REQUEST_CHECK_SETTINGS = 1000;
+    private static final int mNotificationId = 27;
     public GoogleApiClient mGoogleApiClient;
     public Location mLastLocation;
     public LocationRequest mLocationRequest;
@@ -78,7 +84,6 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
     public static double lastPressure;
     public static double lastLat;
     public static double lastLon;
-    public static int measurementsLength = 0;
 
 
     public MonitorService() {
@@ -93,7 +98,6 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
         // Gets data from the incoming Intent
         Log.v(TAG, "Incoming intent!");
 
-
         // get MODE
         int mode = workIntent.getIntExtra("mode", 0);
 
@@ -105,7 +109,6 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
             Log.v(TAG, "Will return data!");
 
         }
-
 
         String data = workIntent.getStringExtra("data");
         int timeDelta = workIntent.getIntExtra("timeDelta", 300);
@@ -244,21 +247,20 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
     @Override
     public void onLocationChanged(Location location) {
         mLastLocation = location;
-        //mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
         mLastUpdateTime = new Date();
         Log.v(TAG, "Getting new location!" + String.valueOf(location) + " " + mLastUpdateTime);
-
-        // getting weather data
-        getWeatherData(mLastLocation, mLastUpdateTime);
-    }
-
-
-
-    public void getWeatherData(final Location location, final Date updateTime) {
 
         // get coordinates
         double lat = Double.parseDouble(String.valueOf(location.getLatitude()));
         double lng = Double.parseDouble(String.valueOf(location.getLongitude()));
+
+        // getting weather data
+        getWeatherData(lat, lng, mLastUpdateTime);
+    }
+
+
+
+    public void getWeatherData(final double lat, final double lng, final Date updateTime) {
 
         // Instantiate the RequestQueue.
         reQueue = Volley.newRequestQueue(this);
@@ -274,9 +276,20 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
                         Log.v(TAG, "Weather response is: "+ response);
                         mLastWeatherUpdate = response;
 
+                        // get relevant data from weather report
+                        JSONObject weatherObject;
+                        try {
+                            weatherObject = new JSONObject(response);
+                            lastTemp = weatherObject.getJSONObject("main").getDouble("temp");
+                            lastHumidity = weatherObject.getJSONObject("main").getDouble("humidity");
+                            lastPressure = weatherObject.getJSONObject("main").getDouble("pressure");
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
                         // once we get weather data, add it to JSON
-                        addDataToJSON(response, location, updateTime);
-                        updateLastValues(response, location, updateTime);
+                        addDataToJSON(lastTemp, lastHumidity, lastPressure, lat, lng, updateTime);
+                        updateLastValues(lastTemp, lastHumidity, lastPressure, lat, lng, updateTime);
                     }
                 }, new Response.ErrorListener() {
             @Override
@@ -291,45 +304,41 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
     }
 
 
-    private void updateLastValues(String weather, Location location, Date updateTime) {
-        // update view activity with latest values
-        lastTime = updateTime;
-        lastLat = location.getLatitude();
-        lastLon = location.getLongitude();
-
-        JSONObject weatherObject;
-        try {
-            weatherObject = new JSONObject(weather);
-            lastTemp = weatherObject.getJSONObject("main").getDouble("temp");
-            lastHumidity = weatherObject.getJSONObject("main").getDouble("humidity");
-            lastPressure = weatherObject.getJSONObject("main").getDouble("pressure");
-
-            // sending result back to activity
-            Intent i = new Intent(ACTION);
-            i.putExtra("status", serviceRunning);
-            i.putExtra("lastTime", lastTime);
-            i.putExtra("lastLat", lastLat);
-            i.putExtra("lastLon", lastLon);
-            i.putExtra("lastTemp", lastTemp);
-            i.putExtra("lastHumidity", lastHumidity);
-            i.putExtra("lastPressure", lastPressure);
-            LocalBroadcastManager.getInstance(this).sendBroadcast(i);
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
+    private void updateLastValues(double lastTemp, double lastHumidity, double lastPressure, double lat, double lng, Date updateTime) {
+        // sending result back to activity
+        Intent i = new Intent(ACTION);
+        i.putExtra("status", serviceRunning);
+        i.putExtra("lastTime", updateTime);
+        i.putExtra("lastLat", lat);
+        i.putExtra("lastLon", lng);
+        i.putExtra("lastTemp", lastTemp);
+        i.putExtra("lastHumidity", lastHumidity);
+        i.putExtra("lastPressure", lastPressure);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(i);
     }
 
 
-    private void addDataToJSON(String weatherData, Location locationData, Date updateTime) {
+    private void addDataToJSON(double lastTemp, double lastHumidity, double lastPressure, double lat, double lng, Date updateTime) {
         // new JSON object
         JSONObject dataObj = new JSONObject();
-        long currentTime = mLastUpdateTime.getTime();
+        long currentTime = updateTime.getTime();
+        JSONObject locObj = new JSONObject();
         try {
+            // new location object
+            locObj.put("x", lat);
+            locObj.put("y", lng);
+            dataObj.put("location", locObj);
+
+            // new weather object
+            JSONObject weatherObj = new JSONObject();
+            weatherObj.put("temperature", lastTemp);
+            weatherObj.put("humidity", lastHumidity);
+            weatherObj.put("pressure", lastPressure);
+            dataObj.put("weather", weatherObj);
+
+            // time
             dataObj.put("time", currentTime);
-            dataObj.put("location", mLastLocation);
-            dataObj.put("weather", weatherData);
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -338,28 +347,23 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
 
         // add new data to array
         dataJSON.put(dataObj);
-        //Log.v(TAG, String.valueOf(dataJSON));
         Log.v(TAG, "Array length: " +  dataJSON.length());
 
         // check temperatures for alerts for alerts
-        Log.v("TEMPS", weatherData);
-        // TODO: clean the output of weather / locaton...
-        // TODO: get actual measured temp
-        validateTemperatures(22.4, currentTime, mLastLocation);
-
+        validateTemperatures(lastTemp, currentTime, locObj);
     }
 
 
-    private void validateTemperatures(double value, long currentTime, Location location) {
+    private void validateTemperatures(double value, long currentTime, JSONObject location) {
         for (int i = 0; i < alerts.length(); i++) {
             try {
                 boolean addAlert = true;
                 String alertMsg = "";
                 JSONObject alert = (JSONObject) alerts.get(i);
                 if (value < alert.getDouble("minTemp")) {
-                    alertMsg = "Warning! Temperature is too low (recommended: " + alert.getDouble("minTemp") + ", measured: " + value + ")";
+                    alertMsg = "Temperature is too low (recommended: " + alert.getDouble("minTemp") + ", measured: " + value + ")";
                 } else if (value > alert.getDouble("maxTemp")) {
-                    alertMsg = "Warning! Temperature is too high (recommended: " + alert.getDouble("maxTemp") + ", measured: " + value + ")";
+                    alertMsg = "Temperature is too high (recommended: " + alert.getDouble("maxTemp") + ", measured: " + value + ")";
                 } else {
                     // everything is great!
                     addAlert = false;
@@ -374,10 +378,11 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
                     newAlertMsg.put("measurementValue", value);
                     alert.getJSONArray("alerts").put(newAlertMsg);
 
-                    // TODO: show notification
+                    // show notification
+                    int icon = R.drawable.ic_priority_high_white_24px;
+                    showNotification("Warning!", alertMsg, icon);
 
                 }
-
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -436,7 +441,7 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
             long startTime = 0;
             if (measurements.length() > 0) {
                 try {
-                    startTime = measurements.getJSONObject(0).getLong("time");
+                    startTime = measurements.getJSONObject(measurements.length()-1).getLong("time");      // TODO: use last one?
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -511,6 +516,40 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
     public static void addAlertsArray(JSONObject obj) {
         alerts.put(obj);
         Log.v("ALERTS", obj.toString());
+    }
+
+
+    public void showNotification(String title, String text, int icon) {
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(this)
+                        .setSmallIcon(icon)
+                        .setContentTitle(title)
+                        .setContentText(text)
+                        .setAutoCancel(true);
+
+        // Creates an explicit intent for an Activity in your app
+        Intent resultIntent = new Intent(this, MonitoringActivity.class);
+
+        // The stack builder object will contain an artificial back stack for the
+        // started Activity.
+        // This ensures that navigating backward from the Activity leads out of
+        // your application to the Home screen.
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        stackBuilder.addParentStack(MonitoringActivity.class);
+        stackBuilder.addNextIntent(resultIntent);
+        PendingIntent resultPendingIntent =
+                stackBuilder.getPendingIntent(
+                        0,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+        mBuilder.setContentIntent(resultPendingIntent);
+        NotificationManager mNotificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        // mNotificationId is a unique integer your app uses to identify the
+        // notification. For example, to cancel the notification, you can pass its ID
+        // number to NotificationManager.cancel().
+        mNotificationManager.notify(mNotificationId, mBuilder.build());
     }
 
 }

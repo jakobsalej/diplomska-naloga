@@ -47,22 +47,14 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemHo
 
         @Override
         public void onClick(View v) {
-            Log.v("Rec view", "CLICK");
-
-            // TODO: start details intent when user clicks on one of the items
 
             // convert object to string to pass it to another activity
-            mItem.printValues();
-            //Log.v("AA", mItem.toString());
-            String odJSON = (new Gson().toJson(mItem));
-
             Context context = itemView.getContext();
             Intent showItemIntent = new Intent(context, OrderItemActivity.class);
             showItemIntent.putExtra("isData", true);
             showItemIntent.putExtra("data", mItem.getData());
             showItemIntent.putExtra("measurements", mItem.getMeasurements());
             context.startActivity(showItemIntent);
-
 
         }
     }

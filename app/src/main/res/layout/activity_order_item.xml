@@ -110,19 +110,43 @@
                 android:drawableLeft="@drawable/ic_equalizer_black_24px"
                 android:drawableTint="@color/colorPrimary"
                 android:drawablePadding="32dp"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="16dp"/>
+                android:gravity="center_vertical" />
 
             <TextView
-                android:id="@+id/textView_vehicleType"
+                android:id="@+id/textView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="56dp"
+                android:fontFamily="sans-serif"
+                android:text="Status"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:id="@+id/textView_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="56dp"
                 android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
-                android:text="Transport type"
-                android:layout_marginLeft="56dp"
-                android:drawablePadding="32dp"
-                android:gravity="center_vertical"
-                />
+                android:text="Date"
+                android:gravity="center_vertical" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="56dp"
+                android:fontFamily="sans-serif"
+                android:text="Created" />
+
+            <Button
+                android:id="@+id/button_transport_details"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:layout_marginStart="52dp"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:text="Transport details"
+                android:visibility="gone"
+                android:layout_marginTop="16dp" />
 
             <View
                 style="@style/Divider"
@@ -131,15 +155,41 @@
                 android:layout_marginTop="24dp"/>
 
             <TextView
-                android:id="@+id/textView_date"
+                android:id="@+id/textView_vehicleType"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
-                android:text="Date"
-                android:drawableLeft="@drawable/ic_schedule_black_24px"
+                android:text="Transport type"
+                android:drawableLeft="@drawable/ic_local_shipping_black_24px"
                 android:drawableTint="@color/colorPrimary"
                 android:drawablePadding="32dp"
                 android:gravity="center_vertical" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="56dp"
+                android:fontFamily="sans-serif"
+                android:text="Vehicle type"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:id="@+id/textView_temp_range"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                android:fontFamily="sans-serif"
+                android:text="Temperature range"
+                android:layout_marginStart="56dp"
+                android:drawablePadding="32dp"
+                android:gravity="center_vertical"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="56dp"
+                android:fontFamily="sans-serif"
+                android:text="Recommended temperature range" />
 
             <View
                 style="@style/Divider"

@@ -1,5 +1,6 @@
 package com.example.jakob.qrreader;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -52,17 +53,15 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
 
     String BASE_URL = "https://diploma-server-rest.herokuapp.com/api/orders/";
 
-    private Button addBtn;
+    private Button addBtn, transportDetailsBtn;
     private GoogleMap mMap;
     private CollapsingToolbarLayout collapsingToolbarLayout;
     private ProgressDialog pd;
     private TextView senderTextView, senderDetailTextView, receiverTextView, receiverDetailTextView,
     statusTextView, dateTextView, vehicleTextView, textTextView, measurementsTextView;
     private String data;
+    private String measurementsData;
     private JSONObject loc1, loc2;
-    private OrderDocumentJSON od;
-    public static ArrayList<JSONObject> temperaturesData;
-
 
     @Override
     public void onFragmentInteraction(Uri uri){
@@ -86,6 +85,7 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
         textTextView = (TextView) findViewById(R.id.textView_text);
         measurementsTextView = (TextView) findViewById(R.id.textView_measurements_raw);
         addBtn = (Button) findViewById(R.id.button_add_item);
+        transportDetailsBtn = (Button) findViewById(R.id.button_transport_details);
 
         // save data to local DB when user clicks ADD
         addBtn.setOnClickListener(new View.OnClickListener() {
@@ -112,13 +112,16 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
         // if we get data from intent (and not just ID)
         if (isData) {
             data = intent.getStringExtra("data");
-            String measurementsData = intent.getStringExtra("measurements");
+            measurementsData = intent.getStringExtra("measurements");
 
             setViewData(data);
             setMeasuremntsViewData(measurementsData);
 
             // hide 'add' button - we already have it stored locally
             addBtn.setVisibility(View.GONE);
+
+            // show transportDetails button
+            transportDetailsBtn.setVisibility(View.VISIBLE);
 
         } else {
             String id = intent.getStringExtra("id");
@@ -474,5 +477,11 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
 
+    }
+
+
+    public void transportDetailsActivity() {
+    //    Intent intent = new Intent(this, TransportDetailsActivity.class);
+    //    startActivity(intent);
     }
 }
