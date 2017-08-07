@@ -96,6 +96,13 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
             }
         });
 
+        // open TransportDetails
+        transportDetailsBtn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                transportDetailsActivity();
+            }
+        });
+
         // get toolbar and set title
         collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
         collapsingToolbarLayout.setTitle("Document title");
@@ -481,7 +488,8 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
 
 
     public void transportDetailsActivity() {
-    //    Intent intent = new Intent(this, TransportDetailsActivity.class);
-    //    startActivity(intent);
+        Intent intent = new Intent(this, TransportDetailsActivity.class);
+        intent.putExtra("transport", measurementsData);
+        startActivity(intent);
     }
 }

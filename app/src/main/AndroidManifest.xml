@@ -19,8 +19,8 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".ReadQRActivity"
-            android:parentActivityName=".Main2Activity"
-            android:label="@string/add_new_doc_string"/>
+            android:label="@string/add_new_doc_string"
+            android:parentActivityName=".Main2Activity" />
         <activity android:name=".DisplayDataActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -76,8 +76,8 @@
         </activity>
         <activity
             android:name=".OrderItemActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity android:name=".TransportDetailsActivity"></activity>
     </application>
 
 </manifest>
