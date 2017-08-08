@@ -9,6 +9,9 @@
     tools:showIn="@layout/activity_monitoring"
     android:orientation="vertical">
 
+
+
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -17,290 +20,192 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:clipToPadding="false"
             android:orientation="vertical" >
 
-
-            <android.support.v7.widget.CardView
-                android:id="@+id/card_view1"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/card_margin"
-                android:padding="16dp"
-                app:cardCornerRadius="@dimen/card_radius">
+                android:layout_height="170dp"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:paddingTop="16dp"
+                android:layout_marginRight="-16dp"
+                android:layout_marginLeft="-16dp"
+                android:layout_marginBottom="24dp"
+                android:background="@color/colorPrimaryLight"
+                android:orientation="vertical">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/card_title1"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="@dimen/card_margin"
-                        android:layout_marginTop="20dp"
-                        android:text="@string/subtitle_card_general"
-                        android:textAppearance="@style/CodeFont" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/textView_status"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="8dp"
-                            android:layout_weight="1"
-                            android:text="@string/textview_status" />
-
-                        <TextView
-                            android:id="@+id/textView_status_value"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center|end"
-                            android:layout_margin="8dp"
-                            android:layout_weight="1"
-                            android:textAlignment="textEnd"
-                            android:textStyle="bold"
-                            android:text="@string/textview_status_default_value" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/textView_time"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="8dp"
-                            android:layout_weight="1"
-                            android:text="@string/textview_time_running" />
-
-                        <TextView
-                            android:id="@+id/textView_time_value"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center|end"
-                            android:layout_margin="8dp"
-                            android:layout_weight="1"
-                            android:text="@string/textview_time_running_value"
-                            android:textStyle="bold"
-                            android:textAlignment="textEnd" />
-                    </LinearLayout>
-                </LinearLayout>
-
-
-            </android.support.v7.widget.CardView>
-
-
-            <android.support.v7.widget.CardView
-                xmlns:card_view="http://schemas.android.com/apk/res-auto"
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                card_view:cardCornerRadius="@dimen/card_radius"
-                android:layout_margin="@dimen/card_margin"
-                android:padding="16dp" >
-
-                <LinearLayout
+                <TextView
+                    android:id="@+id/textView_service_status"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:textAppearance="@style/TextAppearance.AppCompat.Display2"
+                    android:text="@string/textview_service_status_running"
+                    android:textColor="@color/cardview_dark_background"
+                    android:fontFamily="sans-serif-condensed-light"
+                    android:gravity="center_horizontal" />
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="@dimen/card_margin"
-                        android:layout_marginTop="20dp"
-                        android:text="@string/subtitle_card_latest_data"
-                        android:textAppearance="@style/CodeFont" />
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_marginLeft="60dp"
+                    android:layout_marginRight="60dp"
+                    android:layout_height="2dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@color/cardview_dark_background"/>
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/textView_time_latest"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="8dp"
-                            android:layout_weight="1"
-                            android:text="@string/textview_time_latest" />
-
-                        <TextView
-                            android:id="@+id/textView_time_latest_value"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center|end"
-                            android:layout_margin="8dp"
-                            android:layout_weight="1"
-                            android:textAlignment="textEnd"
-                            android:textStyle="bold"
-                            android:text="@string/textview_status_default_value" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/textView_temp"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="8dp"
-                            android:layout_weight="1"
-                            android:text="@string/textview_temp" />
-
-                        <TextView
-                            android:id="@+id/textView_temp_value"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center|end"
-                            android:layout_margin="8dp"
-                            android:layout_weight="1"
-                            android:text="@string/textview_status_default_value"
-                            android:textStyle="bold"
-                            android:textAlignment="textEnd" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/textView_humidity"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="8dp"
-                            android:layout_weight="1"
-                            android:text="@string/textview_humidity" />
-
-                        <TextView
-                            android:id="@+id/textView_humidity_value"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center|end"
-                            android:layout_margin="8dp"
-                            android:layout_weight="1"
-                            android:text="@string/textview_status_default_value"
-                            android:textStyle="bold"
-                            android:textAlignment="textEnd" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/textView_pressure"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="8dp"
-                            android:layout_weight="1"
-                            android:text="@string/textview_pressure" />
-
-                        <TextView
-                            android:id="@+id/textView_pressure_value"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center|end"
-                            android:layout_margin="8dp"
-                            android:layout_weight="1"
-                            android:text="@string/textview_status_default_value"
-                            android:textStyle="bold"
-                            android:textAlignment="textEnd" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/textView_gps_x"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="8dp"
-                            android:layout_weight="1"
-                            android:text="@string/textview_coord_x" />
-
-                        <TextView
-                            android:id="@+id/textView_gps_x_value"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center|end"
-                            android:layout_margin="8dp"
-                            android:layout_weight="1"
-                            android:text="@string/textview_status_default_value"
-                            android:textStyle="bold"
-                            android:textAlignment="textEnd" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/textView_gps_y"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="8dp"
-                            android:layout_weight="1"
-                            android:text="@string/textview_coord_y" />
-
-                        <TextView
-                            android:id="@+id/textView_gps_y_value"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center|end"
-                            android:layout_margin="8dp"
-                            android:layout_weight="1"
-                            android:text="@string/textview_status_default_value"
-                            android:textStyle="bold"
-                            android:textAlignment="textEnd" />
-                    </LinearLayout>
-                </LinearLayout>
-
-            </android.support.v7.widget.CardView>
-
-
-            <android.support.v7.widget.CardView
-                xmlns:card_view="http://schemas.android.com/apk/res-auto"
-                android:layout_marginTop="10dp"
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                card_view:cardCornerRadius="@dimen/card_radius"
-                android:layout_margin="@dimen/card_margin">
-
-                <LinearLayout
+                <TextView
+                    android:id="@+id/textView_time_running"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical" >
+                    android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                    android:text="Time Running: Not started"
+                    android:fontFamily="sans-serif-light"
+                    android:textColor="@color/cardview_dark_background"
+                    android:layout_marginBottom="8dp"
+                    android:gravity="center_horizontal" />
 
-                    <com.google.android.gms.maps.MapView
-                        android:id="@+id/mapView"
-                        android:layout_width="match_parent"
-                        android:layout_height="200dp" />
+                <TextView
+                    android:id="@+id/textView_temp_latest"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                    android:text="Latest temperature: Not available"
+                    android:textColor="@color/cardview_dark_background"
+                    android:fontFamily="sans-serif-light"
+                    android:gravity="center_horizontal" />
 
-                    <Button
-                        android:id="@+id/button2"
-                        style="?android:attr/borderlessButtonStyle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/button_open_maps"
-                        android:textColor="@color/colorPrimary" />
+            </LinearLayout>
 
-                </LinearLayout>
+            <TextView
+                android:id="@+id/textView_start_time"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                android:text="Time started"
+                android:drawableLeft="@drawable/ic_equalizer_black_24px"
+                android:drawableTint="@color/colorPrimary"
+                android:drawablePadding="32dp"
+                android:gravity="center_vertical" />
 
-            </android.support.v7.widget.CardView>
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="56dp"
+                android:fontFamily="sans-serif"
+                android:text="Start"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:id="@+id/textView_last_update_time"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="56dp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                android:text="Time of last update"
+                android:gravity="center_vertical" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="56dp"
+                android:fontFamily="sans-serif"
+                android:text="Last update"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:id="@+id/textView_current_location"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="56dp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                android:text="Location"
+                android:gravity="center_vertical" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="56dp"
+                android:fontFamily="sans-serif"
+                android:text="Current location"
+                android:layout_marginBottom="24dp" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                    android:text="MAP"
+                    android:fontFamily="sans-serif-condensed"
+                    android:textColor="@color/colorPrimary"
+                    android:drawableLeft="@drawable/ic_map_black_24px"
+                    android:drawableTint="@color/colorPrimary"
+                    android:drawablePadding="32dp"
+                    android:gravity="center_vertical"
+                    android:layout_centerVertical="true" />
+
+                <Button
+                    android:id="@+id/button_show_all"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentRight="true"
+                    style="@style/Widget.AppCompat.Button.Colored"
+                    android:text="OPEN" />
+
+            </RelativeLayout>
+
+            <com.google.android.gms.maps.MapView
+                android:id="@+id/mapView"
+                android:layout_width="match_parent"
+                android:layout_marginLeft="-16dp"
+                android:layout_marginRight="-16dp"
+                android:layout_height="200dp"
+                android:layout_marginBottom="24dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:text="ACTIVE ORDERS"
+                android:textColor="@color/colorPrimary"
+                android:drawableLeft="@drawable/ic_assignment_black_24px"
+                android:drawableTint="@color/colorPrimary"
+                android:fontFamily="sans-serif-condensed"
+                android:drawablePadding="32dp"
+                android:layout_marginBottom="24dp"
+                android:gravity="center_vertical"/>
+
+            <FrameLayout
+                android:id="@+id/fragment_holder_orders"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+            </FrameLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:text="ALERTS"
+                android:textColor="@color/colorPrimary"
+                android:drawableLeft="@drawable/ic_error_outline_black_24px"
+                android:drawableTint="@color/colorPrimary"
+                android:fontFamily="sans-serif-condensed"
+                android:drawablePadding="32dp"
+                android:layout_marginBottom="24dp"
+                android:gravity="center_vertical"/>
+
+            <FrameLayout
+                android:id="@+id/fragment_holder_alerts"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+            </FrameLayout>
 
         </LinearLayout>
     </ScrollView>

@@ -20,6 +20,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import org.json.JSONArray;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +45,7 @@ public class Main2Activity extends AppCompatActivity {
      */
     private ViewPager mViewPager;
     public static SQLiteDatabase db;
+    public JSONArray ongoingOrders;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

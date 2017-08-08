@@ -45,12 +45,8 @@
         <activity android:name=".ShowGraphActivity" />
         <activity
             android:name=".MonitoringActivity"
-            android:label="@string/title_activity_monitoring"
-            android:parentActivityName=".ReadQRActivity"
+            android:label="Monitoring"
             android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.jakob.qrreader.ReadQRActivity" />
         </activity>
 
         <service

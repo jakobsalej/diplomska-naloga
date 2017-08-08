@@ -76,8 +76,9 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
     private RequestQueue reQueue;
     private String weatherAppID = "126cb0f7fc8884208c5178d70cac7bea";
     private static JSONArray dataJSON = new JSONArray();
-    private static JSONArray alerts = new JSONArray();
+    public static JSONArray alerts = new JSONArray();
     public static boolean serviceRunning = false;
+    public static long startTime;
     public static Date lastTime;
     public static double lastTemp;
     public static double lastHumidity;
@@ -93,48 +94,12 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
     @Override
     protected void onHandleIntent(Intent workIntent) {
 
-        serviceRunning = true;
-
-        // Gets data from the incoming Intent
-        Log.v(TAG, "Incoming intent!");
-
-        // get MODE
-        int mode = workIntent.getIntExtra("mode", 0);
-
-        if (mode == 0) {
-            // start service
-            connectToGoogleApiClient();
-        } else if (mode == 1) {
-            // return available data immediately
-            Log.v(TAG, "Will return data!");
-
-        }
-
-        String data = workIntent.getStringExtra("data");
-        int timeDelta = workIntent.getIntExtra("timeDelta", 300);
-
-        Log.v(TAG, "Starting monitor service with data " + data + timeDelta);
-        String status = "Running";
-
-        /* WTF IS THIS
-        JSONObject obj;
-
-        // parse JSON
-        try {
-            obj = new JSONObject(data);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        */
-
-
+        connectToGoogleApiClient();
+        startTime = new Date().getTime();
 
         Log.v(TAG, "Service will enter infinite loop now.");
-
         while(true) {
         }
-
-
     }
 
 
@@ -251,11 +216,11 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
         Log.v(TAG, "Getting new location!" + String.valueOf(location) + " " + mLastUpdateTime);
 
         // get coordinates
-        double lat = Double.parseDouble(String.valueOf(location.getLatitude()));
-        double lng = Double.parseDouble(String.valueOf(location.getLongitude()));
+        lastLat = Double.parseDouble(String.valueOf(location.getLatitude()));
+        lastLon = Double.parseDouble(String.valueOf(location.getLongitude()));
 
         // getting weather data
-        getWeatherData(lat, lng, mLastUpdateTime);
+        getWeatherData(lastLat, lastLon, mLastUpdateTime);
     }
 
 
@@ -381,7 +346,6 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
                     // show notification
                     int icon = R.drawable.ic_priority_high_white_24px;
                     showNotification("Warning!", alertMsg, icon);
-
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -420,7 +384,9 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
         mGoogleApiClient.disconnect();
         serviceRunning = false;
         // TODO: send Broadcast to view, so we know background activity stopped
+        updateLastValues(0, 0, 0, 0, 0, null);
     }
+
 
     private void saveMeasurements() {
 

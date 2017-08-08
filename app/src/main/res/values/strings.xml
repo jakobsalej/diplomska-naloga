@@ -21,6 +21,8 @@
     <string name="textview_coord_x">Lat:</string>
     <string name="textview_coord_y">Lon:</string>
     <string name="textview_pressure">Pressure:</string>
+    <string name="textview_service_status_running">RUNNING</string>
+    <string name="textview_service_status_not_running">NOT RUNNING</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

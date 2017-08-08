@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static android.R.attr.fragment;
+
 
 public class TransportDetailsActivity extends AppCompatActivity implements CommonItemFragment.OnFragmentInteractionListener{
 
@@ -167,9 +169,11 @@ public class TransportDetailsActivity extends AppCompatActivity implements Commo
         lc.invalidate(); // refresh
 
         // alerts fragment
-        CommonItemFragment fragment = CommonItemFragment.newInstance("alerts", alertsArray.toString());
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.fragment_holder_alerts, fragment).commit();
+        if (alertsArray != null && alertsArray.length() > 0) {
+            CommonItemFragment fragment = CommonItemFragment.newInstance("alerts", alertsArray.toString());
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fragment_holder_alerts, fragment).commit();
+        }
     }
 
     private void setTextData(int delivered, long startDate, long endDate, long duration, String vehicleData, String driverInfo, String comment) {

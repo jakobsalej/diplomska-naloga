@@ -10,6 +10,7 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -22,13 +23,13 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.fitness.data.Value;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -48,12 +49,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.DateFormat;
-import java.util.Map;
+import java.text.Format;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
-import static android.R.attr.colorPrimary;
 import static android.R.attr.data;
+import static com.example.jakob.qrreader.MonitorService.alerts;
 import static com.example.jakob.qrreader.MonitorService.lastLon;
-import static com.example.jakob.qrreader.R.id.map;
+import static com.example.jakob.qrreader.RecyclerAdapterCommonAlerts.convertTime;
 
 
 public class MonitoringActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, OnMapReadyCallback {
@@ -67,9 +70,31 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
     public int locationInterval = 300;
     public static boolean serviceRunning = false;
     private int notificationId = 0;
-    private TextView status, time, temp, humidity, pressure, lat, lng;
+    private TextView status, timeRunning, startTime, lastUpdateTime, temp, humidity, pressure, lat, lng, location;
     private MapView mapView;
     private GoogleMap map;
+    private String appName;
+
+
+    private long timerTime = 0;
+    //runs without a timer by reposting this handler at the end of the runnable
+    Handler timerHandler = new Handler();
+    Runnable timerRunnable = new Runnable() {
+
+        @Override
+        public void run() {
+            long millis = System.currentTimeMillis() - timerTime;
+            int seconds = (int) (millis / 1000);
+            int minutes = seconds / 60;
+            seconds = seconds % 60;
+
+            timeRunning.setText(String.format("%d:%02d", minutes, seconds));
+
+            timerHandler.postDelayed(this, 500);
+        }
+    };
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,29 +103,26 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // Get the Intent that started this activity and extract the string
-        Log.v(TAG, "On create!");
-        Intent intent = getIntent();
-        final String data = intent.getStringExtra("data");
+        // get app name
+        appName = getString(R.string.app_name);
+
+        // get views
+        status = (TextView) findViewById(R.id.textView_service_status);
+        temp = (TextView) findViewById(R.id.textView_temp_latest);
+        timeRunning = (TextView) findViewById(R.id.textView_time_running);
+        startTime = (TextView) findViewById(R.id.textView_start_time);
+        lastUpdateTime = (TextView) findViewById(R.id.textView_last_update_time);
+        location = (TextView) findViewById(R.id.textView_current_location);
+
+        // timer
+        if (MonitorService.serviceRunning) {
+            timerTime = MonitorService.startTime;
+            timerHandler.postDelayed(timerRunnable, 0);
+        }
 
         // set location interval
         // TODO: get this from settings?
         final int timeDelta = locationInterval;
-
-        // parse JSON
-        if (data != null && data.length() > 0) {
-            try {
-                JSONObject obj = new JSONObject(data);
-
-                // set toolbar title
-                // TODO: set correct title also onResume()
-                String title = obj.getString("title");
-                getSupportActionBar().setTitle(title);
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
 
         // MAP
         GoogleMapOptions options = new GoogleMapOptions();
@@ -110,6 +132,15 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
         mapView = (MapView) findViewById(R.id.mapView);
         mapView.onCreate(null);
         mapView.getMapAsync(this);
+
+        // alerts fragment
+        /*
+        if (alerts != null && alerts.length() > 0) {
+            CommonItemFragment fragment = CommonItemFragment.newInstance("alerts", alerts.toString());
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fragment_holder_alerts, fragment).commit();
+        }
+        */
 
 
         // new service intent
@@ -121,9 +152,9 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
             @Override
             public void onClick(View view) {
                 if (!serviceRunning) {
-                    startMonitoring(i, 0, data, timeDelta);
+                    startMonitoring(i, 0, null, timeDelta);
                     serviceRunning = true;
-                    status.setText("Running");
+                    //status.setText("Running");
                     showNotification();
                     Snackbar.make(view, "Monitor activity started!", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
@@ -131,15 +162,13 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
                     stopService(i);
                     cancelNotification(getApplicationContext(), notificationId);
                     serviceRunning = false;
-                    status.setText("Not Running");
+                    //status.setText("Not Running");
                     Snackbar.make(view, "Monitor activity stopped!", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
                 }
 
             }
         });
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
 
         // last known location == current location
         // Create an instance of GoogleAPIClient.
@@ -174,46 +203,29 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
     protected void onResume() {
         super.onResume();
         mapView.onResume();
-
         Log.v(TAG, "On resume!!");
 
         // Register for the particular broadcast based on ACTION string
         IntentFilter ifilter = new IntentFilter(MonitorService.ACTION);
         LocalBroadcastManager.getInstance(this).registerReceiver(monitorReceiver, ifilter);
 
-        // get info if background service is running
-        //requestDataUpdate();
-
+        // set status
         serviceRunning = MonitorService.serviceRunning;
-
-        // set latest data to view
-        status = (TextView) findViewById(R.id.textView_status_value);
         if (serviceRunning) {
-            status.setText("Running");
+            status.setText("RUNNING");
         } else {
-            status.setText("Not running");
+            status.setText("NOT RUNNING");
         }
+        startTime.setText(convertTime(MonitorService.startTime));
+        temp.setText("Latest temperature: " + Double.toString(MonitorService.lastTemp) + " °C");
+        location.setText(Double.toString(MonitorService.lastLat) + ", " + Double.toString(MonitorService.lastLon));
 
-        // TODO: add measurement units
-        // TODO: do this in setLastValues()?
-
-        //time = (TextView) findViewById(R.id.textView_time_latest_value);
-        //time.setText(MonitorService.lastTime.toString());
-
-        temp = (TextView) findViewById(R.id.textView_temp_value);
-        temp.setText(Double.toString(MonitorService.lastTemp));
-
+        /*
         humidity = (TextView) findViewById(R.id.textView_humidity_value);
         humidity.setText(Double.toString(MonitorService.lastHumidity));
-
         pressure = (TextView) findViewById(R.id.textView_pressure_value);
         pressure.setText(Double.toString(MonitorService.lastPressure));
-
-        lat = (TextView) findViewById(R.id.textView_gps_x_value);
-        lat.setText(Double.toString(MonitorService.lastLat));
-
-        lng = (TextView) findViewById(R.id.textView_gps_y_value);
-        lng.setText(Double.toString(lastLon));
+        */
 
     }
 
@@ -253,6 +265,13 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
         @Override
         public void onReceive(Context context, Intent intent) {
             serviceRunning = intent.getBooleanExtra("status", false);
+
+            // SERVICE STOPPED!!
+            if (!serviceRunning) {
+                status.setText("NOT RUNNING");
+                timerHandler.removeCallbacks(timerRunnable);
+                return;
+            }
             String lastTime = intent.getStringExtra("lastTime");
             double lastLat = intent.getDoubleExtra("lastLat", -1);
             double lastLong = intent.getDoubleExtra("lastLon", -1);
@@ -268,12 +287,11 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
     
     private void setLastValues(boolean serviceRunning, String lastTime, double lastLat, double lastLong, double lastTemp, double lastHumidity, double lastPressure) {
         // TODO: also set service running??
-        //time.setText(lastTime);
-        temp.setText(Double.toString(lastTemp));
-        humidity.setText(Double.toString(lastHumidity));
-        pressure.setText(Double.toString(lastPressure));
-        lat.setText(Double.toString(lastLat));
-        lng.setText(Double.toString(lastLong));
+        //startTime.setText(lastTime);
+        temp.setText("Latest temperature: " + Double.toString(lastTemp) + " °C");
+        location.setText(Double.toString(lastLat) + ", " + Double.toString(lastLon));
+        //humidity.setText(Double.toString(lastHumidity));
+        //pressure.setText(Double.toString(lastPressure));
     }
 
 
@@ -410,8 +428,8 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
         NotificationCompat.Builder mBuilder =
                 (NotificationCompat.Builder) new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.cast_ic_notification_small_icon)
-                        .setContentTitle("My notification")
-                        .setContentText("Hello World!")
+                        .setContentTitle(appName)
+                        .setContentText("Monitoring service is running!")
                         .setOngoing(true);
         // Creates an explicit intent for an Activity in your app
         Intent resultIntent = new Intent(this, MonitoringActivity.class);
@@ -452,6 +470,13 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
         googleMap.addMarker(new MarkerOptions()
                 .position(new LatLng(0, 0))
                 .title("Marker"));
+    }
+
+
+    public String convertTime(long time){
+        Date date = new Date(time);
+        Format format = new SimpleDateFormat("HH:mm, dd.MM.yyyy");
+        return format.format(date);
     }
 }
 

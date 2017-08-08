@@ -107,6 +107,7 @@ public class MainTabFragment extends Fragment{
             try {
                 JSONArray alertsArray = new JSONArray();
                 obj.put("id", order.getId());
+                obj.put("title", order.getTitle());
                 obj.put("minTemp", order.getMinTemp());
                 obj.put("maxTemp", order.getMaxTemp());
                 obj.put("alerts", alertsArray);
