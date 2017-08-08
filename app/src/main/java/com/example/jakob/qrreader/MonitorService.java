@@ -203,8 +203,8 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
     // continous location updates
     protected void createLocationRequest() {
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(20000);    // TODO: set from 'location interval'
-        mLocationRequest.setFastestInterval(10000);
+        mLocationRequest.setInterval(30000);    // TODO: set from 'location interval'
+        mLocationRequest.setFastestInterval(30000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         // add location request
@@ -441,7 +441,7 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
             long startTime = 0;
             if (measurements.length() > 0) {
                 try {
-                    startTime = measurements.getJSONObject(measurements.length()-1).getLong("time");      // TODO: use last one?
+                    startTime = measurements.getJSONObject(0).getLong("time");      // TODO: use last one?
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

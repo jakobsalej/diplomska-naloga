@@ -36,6 +36,9 @@
                 map:uiZoomGestures="false"/>
 
             <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+                app:layout_collapseMode="pin"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"/>
 
@@ -146,6 +149,7 @@
                 style="@style/Widget.AppCompat.Button.Colored"
                 android:text="Transport details"
                 android:visibility="gone"
+                android:onClick="transportDetailsActivity"
                 android:layout_marginTop="16dp" />
 
             <View
@@ -205,12 +209,11 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
-                    android:text="Cargo"
-                    android:textSize="14dp"
-                    android:fontFamily="sans-serif-medium"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                    android:text="CARGO"
+                    android:fontFamily="sans-serif-condensed"
                     android:textColor="@color/colorPrimary"
-                    android:drawableLeft="@drawable/ic_local_shipping_black_24px"
+                    android:drawableLeft="@drawable/ic_work_black_24px"
                     android:drawableTint="@color/colorPrimary"
                     android:drawablePadding="32dp"
                     android:gravity="center_vertical"
@@ -223,8 +226,8 @@
                     android:layout_centerVertical="true"
                     android:layout_alignParentRight="true"
                     style="@style/Widget.AppCompat.Button.Borderless.Colored"
-                    android:text="Show all" />
-
+                    android:text="Show all"
+                    android:visibility="gone" />
 
             </RelativeLayout>
 
@@ -251,26 +254,15 @@
                 android:drawableLeft="@drawable/ic_insert_comment_black_24px"
                 android:drawableTint="@color/colorPrimary"
                 android:drawablePadding="32dp"
-                android:layout_marginBottom="24dp"
                 android:gravity="center_vertical" />
-
-            <View
-                style="@style/Divider"
-                android:layout_marginStart="56dp"
-                android:layout_marginBottom="24dp"
-                android:layout_marginTop="14dp"/>
 
             <TextView
-                android:id="@+id/textView_measurements_raw"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
-                android:text="Measurements"
-                android:drawableLeft="@drawable/ic_insert_comment_black_24px"
-                android:drawableTint="@color/colorPrimary"
-                android:drawablePadding="32dp"
-                android:layout_marginBottom="24dp"
-                android:gravity="center_vertical" />
+                android:layout_marginStart="56dp"
+                android:fontFamily="sans-serif"
+                android:text="Additional details"
+                android:layout_marginBottom="24dp" />
 
             <Button
                 android:id="@+id/button_add_item"
@@ -279,7 +271,8 @@
                 android:layout_gravity="end"
                 android:layout_marginBottom="8dp"
                 style="@style/Widget.AppCompat.Button.Colored"
-                android:text="Add" />
+                android:text="Add"
+                android:onClick="onAddClick"/>
 
 
         </LinearLayout>

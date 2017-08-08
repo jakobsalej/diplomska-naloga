@@ -10,6 +10,7 @@ import android.os.Build;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -41,6 +42,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.StringTokenizer;
 import java.util.TimeZone;
 
 import database.DatabaseHandler;
@@ -58,10 +60,11 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
     private CollapsingToolbarLayout collapsingToolbarLayout;
     private ProgressDialog pd;
     private TextView senderTextView, senderDetailTextView, receiverTextView, receiverDetailTextView,
-    statusTextView, dateTextView, vehicleTextView, textTextView, measurementsTextView;
+    statusTextView, dateTextView, vehicleTextView, textTextView, tempRangeTextView;
     private String data;
     private String measurementsData;
     private JSONObject loc1, loc2;
+    private double minTemp, maxTemp;
 
     @Override
     public void onFragmentInteraction(Uri uri){
@@ -83,29 +86,17 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
         dateTextView = (TextView) findViewById(R.id.textView_date);
         vehicleTextView = (TextView) findViewById(R.id.textView_vehicleType);
         textTextView = (TextView) findViewById(R.id.textView_text);
-        measurementsTextView = (TextView) findViewById(R.id.textView_measurements_raw);
+        tempRangeTextView = (TextView) findViewById(R.id.textView_temp_range);
         addBtn = (Button) findViewById(R.id.button_add_item);
         transportDetailsBtn = (Button) findViewById(R.id.button_transport_details);
-
-        // save data to local DB when user clicks ADD
-        addBtn.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                if (data != null) {
-                    onAddClick();
-                }
-            }
-        });
-
-        // open TransportDetails
-        transportDetailsBtn.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                transportDetailsActivity();
-            }
-        });
 
         // get toolbar and set title
         collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
         collapsingToolbarLayout.setTitle("Document title");
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -151,7 +142,8 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
     }
 
     private void setMeasuremntsViewData(String measurementsData) {
-        measurementsTextView.setText(measurementsData);
+        minTemp = 10;
+        maxTemp = 30;
     }
 
 
@@ -216,16 +208,24 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
             String formattedDate = null;
             try {
                 Date parsedDate = parser.parse(date);
-                SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy (HH:mm)");
+                SimpleDateFormat formatter = new SimpleDateFormat("HH:mm, dd.MM.yyyy");
                 formattedDate = formatter.format(parsedDate);
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-            dateTextView.setText("Created on " + formattedDate);
+            dateTextView.setText(formattedDate);
 
             // text
             String text = obj.getString("text");
             textTextView.setText(text);
+
+            // temp range
+            // TODO: get from DB
+            double minT = 15;
+            double maxT = 30;
+            minTemp = minT;
+            maxTemp = maxT;
+            tempRangeTextView.setText(String.valueOf(minTemp) + " °C - " + String.valueOf(maxTemp) + " °C");
 
             // cargo
             //JSONObject cargoObj = obj.getJSONObject("cargo");
@@ -236,9 +236,6 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
             CommonItemFragment fragment = CommonItemFragment.newInstance("cargo", cargoItems.toString());
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.fragment_holder, fragment).commit();
-
-            // measurements
-            //measurementsTextView.setText(obj.getString("transport"));
 
 
         } catch (JSONException e) {
@@ -476,20 +473,21 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
     }
 
 
-    public void onAddClick() {
+    public void onAddClick(View v) {
         saveToDB(data);     // TODO: this should not be on main thread?
         Intent intent = new Intent(this, Main2Activity.class);
 
         // clear back button stack
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
-
     }
 
 
-    public void transportDetailsActivity() {
+    public void transportDetailsActivity(View v) {
         Intent intent = new Intent(this, TransportDetailsActivity.class);
         intent.putExtra("transport", measurementsData);
+        intent.putExtra("minTemp", minTemp);
+        intent.putExtra("maxTemp", maxTemp);
         startActivity(intent);
     }
 }
