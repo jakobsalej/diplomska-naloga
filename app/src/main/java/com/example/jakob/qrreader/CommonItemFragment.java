@@ -13,6 +13,8 @@ import android.view.ViewGroup;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.util.Objects;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -34,6 +36,7 @@ public class CommonItemFragment extends Fragment {
 
     private RecyclerView mRecyclerView;
     private RecyclerAdapterCommon mAdapter;
+    private RecyclerAdapterCommonAlerts mAdapterAlerts;
     private RecyclerView.LayoutManager mLayoutManager;
 
     public CommonItemFragment() {
@@ -91,8 +94,13 @@ public class CommonItemFragment extends Fragment {
         }
 
         // specify an adapter (see also next example)
-        mAdapter = new RecyclerAdapterCommon(items);
-        mRecyclerView.setAdapter(mAdapter);
+        if (type.equals("alerts")) {
+            mAdapterAlerts = new RecyclerAdapterCommonAlerts(items);
+            mRecyclerView.setAdapter(mAdapterAlerts);
+        } else if (type.equals("cargo")) {
+            mAdapter = new RecyclerAdapterCommon(items);
+            mRecyclerView.setAdapter(mAdapter);
+        }
 
         return view;
     }

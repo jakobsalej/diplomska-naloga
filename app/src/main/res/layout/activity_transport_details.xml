@@ -94,48 +94,66 @@
             android:layout_marginTop="24dp"/>
 
         <TextView
-            android:id="@+id/textView_sender"
+            android:id="@+id/textView_vehicle_info"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
-            android:text="Sender"
-            android:drawableLeft="@drawable/ic_place_black_24px"
+            android:text="Vehicle no. (type)"
+            android:drawableLeft="@drawable/ic_local_shipping_black_24px"
             android:drawableTint="@color/colorPrimary"
             android:drawablePadding="32dp"
             android:gravity="center_vertical"/>
 
         <TextView
-            android:id="@+id/textView_sender_details"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="56dp"
             android:layout_marginBottom="16dp"
-            android:text="Details" />
+            android:text="Vehicle details" />
 
         <TextView
-            android:id="@+id/textView_receiver"
+            android:id="@+id/textView_driver_info"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
             android:fontFamily="sans-serif"
-            android:text="Receiver"
+            android:text="Driver"
             android:layout_marginStart="56dp"
             android:drawablePadding="32dp"
             android:gravity="center_vertical"/>
 
         <TextView
-            android:id="@+id/textView_receiver_details"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="56dp"
             android:fontFamily="sans-serif"
-            android:text="Details" />
+            android:text="Driver details" />
 
         <View
             style="@style/Divider"
             android:layout_marginStart="56dp"
             android:layout_marginBottom="24dp"
             android:layout_marginTop="24dp"/>
+
+        <TextView
+            android:id="@+id/textView_comment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+            android:fontFamily="sans-serif"
+            android:text="Optional text"
+            android:drawableLeft="@drawable/ic_insert_comment_black_24px"
+            android:drawableTint="@color/colorPrimary"
+            android:drawablePadding="32dp"
+            android:gravity="center_vertical"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="56dp"
+            android:fontFamily="sans-serif"
+            android:text="Comment"
+            android:layout_marginBottom="48dp"/>
 
         <TextView
             android:layout_width="match_parent"
@@ -166,7 +184,7 @@
             android:id="@+id/chart_first"
             android:layout_width="match_parent"
             android:layout_height="200dp"
-            android:layout_marginBottom="24dp" />
+            android:layout_marginBottom="48dp" />
 
         <TextView
             android:layout_width="match_parent"
@@ -179,11 +197,13 @@
             android:fontFamily="sans-serif-condensed"
             android:drawablePadding="32dp"
             android:layout_marginBottom="24dp"
-            android:layout_marginTop="16dp"
             android:gravity="center_vertical"/>
 
-
-
+        <FrameLayout
+            android:id="@+id/fragment_holder_alerts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+        </FrameLayout>
 
     </LinearLayout>
 

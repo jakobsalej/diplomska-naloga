@@ -458,7 +458,7 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
             int delivered = 1;
 
             // create new object transport
-            JSONObject tr = addNewTransportObject(ord.getId(), measurements, alertMsgs.toString(), startTime, endTime, delivered);
+            JSONObject tr = addNewTransportObject(ord.getId(), measurements, alertMsgs, startTime, endTime, delivered);
             ord.setMeasurements(tr.toString());
             //ord.setNewJSONValue("transport", tr.toString(), 0);
 
@@ -483,7 +483,7 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
         return null;
     }
 
-    private JSONObject addNewTransportObject(Integer id, JSONArray measurements, String alerts, long startTime, long endTime, int delivered) {
+    private JSONObject addNewTransportObject(Integer id, JSONArray measurements, JSONArray alerts, long startTime, long endTime, int delivered) {
 
         // calculate duration in hours
         long duration = (endTime - startTime) / (60 * 60 * 1000) % 24;

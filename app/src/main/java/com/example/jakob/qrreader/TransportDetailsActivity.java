@@ -2,6 +2,7 @@ package com.example.jakob.qrreader;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -27,14 +28,21 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static com.example.jakob.qrreader.R.id.chart;
-import static java.lang.Long.getLong;
 
-public class TransportDetailsActivity extends AppCompatActivity {
+public class TransportDetailsActivity extends AppCompatActivity implements CommonItemFragment.OnFragmentInteractionListener{
 
     private LineChart lc;
     private long baseTime;
-    private TextView textViewDelivered, textViewStarted, textViewEnded, textViewDuration;
+    private TextView textViewDelivered, textViewStarted, textViewEnded, textViewDuration,
+            textViewVehicle, textViewDriver, textViewComment;
+    private JSONArray alertsArray;
+
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+        //you can leave it empty
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +54,9 @@ public class TransportDetailsActivity extends AppCompatActivity {
         textViewStarted = (TextView) findViewById(R.id.textView_time_started);
         textViewEnded = (TextView) findViewById(R.id.textView_time_ended);
         textViewDuration = (TextView) findViewById(R.id.textView_time_duration);
+        textViewVehicle = (TextView) findViewById(R.id.textView_vehicle_info);
+        textViewDriver = (TextView) findViewById(R.id.textView_driver_info);
+        textViewComment = (TextView) findViewById(R.id.textView_comment);
 
         Intent intent = getIntent();
         String data = intent.getStringExtra("transport");
@@ -58,11 +69,28 @@ public class TransportDetailsActivity extends AppCompatActivity {
         try {
             JSONObject obj = new JSONObject(data);
             measurements = obj.getJSONArray("measurements");
+
+            // set view
             int delivered = obj.getInt("delivered");
             long startDate = obj.getLong("startDate");
             long endDate = obj.getLong("endDate");
             long duration = obj.getLong("duration");
-            setTextData(delivered, startDate, endDate, duration);
+            int vehicleInfo = obj.getInt("vehicleType");
+            String vehicle = null;
+            if (vehicleInfo == 0) {
+                vehicle = "normal";
+            } else {
+                vehicle = "with cooler";
+            }
+            String vehicleNo = obj.getString("vehicleReg");
+            String vehicleData = vehicleNo + " (type: " + vehicle + ")";
+            String driverInfo = "Driver ID: " + obj.getInt("driverID") + " (you)";
+            String comment = obj.getString("text");
+            setTextData(delivered, startDate, endDate, duration, vehicleData, driverInfo, comment);
+
+            // get alerts
+            alertsArray = obj.getJSONArray("alerts");
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -137,9 +165,14 @@ public class TransportDetailsActivity extends AppCompatActivity {
         LineData lineData = new LineData(dataSet);
         lc.setData(lineData);
         lc.invalidate(); // refresh
+
+        // alerts fragment
+        CommonItemFragment fragment = CommonItemFragment.newInstance("alerts", alertsArray.toString());
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.fragment_holder_alerts, fragment).commit();
     }
 
-    private void setTextData(int delivered, long startDate, long endDate, long duration) {
+    private void setTextData(int delivered, long startDate, long endDate, long duration, String vehicleData, String driverInfo, String comment) {
 
         // delivered status
         if (delivered == 1) {
@@ -154,6 +187,9 @@ public class TransportDetailsActivity extends AppCompatActivity {
         textViewStarted.setText(convertTime(startDate));
         textViewEnded.setText(convertTime(endDate));
         textViewDuration.setText(String.valueOf(duration) + " h");
+        textViewVehicle.setText(vehicleData);
+        textViewDriver.setText(driverInfo);
+        textViewComment.setText(comment);
     }
 
 

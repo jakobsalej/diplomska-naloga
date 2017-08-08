@@ -201,10 +201,29 @@
                 android:layout_marginBottom="24dp"
                 android:layout_marginTop="24dp"/>
 
+            <TextView
+                android:id="@+id/textView_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                android:text="Comments"
+                android:drawableLeft="@drawable/ic_insert_comment_black_24px"
+                android:drawableTint="@color/colorPrimary"
+                android:drawablePadding="32dp"
+                android:gravity="center_vertical" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="56dp"
+                android:fontFamily="sans-serif"
+                android:text="Additional details"
+                android:layout_marginBottom="48dp" />
+
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:layout_marginBottom="8dp">
+                android:layout_marginBottom="16dp">
 
                 <TextView
                     android:layout_width="match_parent"
@@ -231,38 +250,12 @@
 
             </RelativeLayout>
 
-
             <FrameLayout
                 android:id="@+id/fragment_holder"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="56dp">
             </FrameLayout>
-
-            <View
-                style="@style/Divider"
-                android:layout_marginStart="56dp"
-                android:layout_marginBottom="24dp"
-                android:layout_marginTop="14dp"/>
-
-            <TextView
-                android:id="@+id/textView_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
-                android:text="Comments"
-                android:drawableLeft="@drawable/ic_insert_comment_black_24px"
-                android:drawableTint="@color/colorPrimary"
-                android:drawablePadding="32dp"
-                android:gravity="center_vertical" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="56dp"
-                android:fontFamily="sans-serif"
-                android:text="Additional details"
-                android:layout_marginBottom="24dp" />
 
             <Button
                 android:id="@+id/button_add_item"
