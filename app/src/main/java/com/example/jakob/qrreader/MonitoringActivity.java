@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -51,15 +52,20 @@ import org.json.JSONObject;
 import java.text.DateFormat;
 import java.text.Format;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
+import database.DatabaseHandler;
+import database.OrderDocumentJSON;
+
 import static android.R.attr.data;
+import static android.R.attr.fragment;
 import static com.example.jakob.qrreader.MonitorService.alerts;
 import static com.example.jakob.qrreader.MonitorService.lastLon;
 import static com.example.jakob.qrreader.RecyclerAdapterCommonAlerts.convertTime;
 
 
-public class MonitoringActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, OnMapReadyCallback {
+public class MonitoringActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, OnMapReadyCallback, AlertsFragment.OnFragmentInteractionListener {
 
     private static final String TAG = "MonitoringActivity";
     private static final int REQUEST_CHECK_SETTINGS = 1000;
@@ -73,9 +79,11 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
     private TextView status, timeRunning, startTime, lastUpdateTime, temp, humidity, pressure, lat, lng, location;
     private MapView mapView;
     private GoogleMap map;
+    private ArrayList<OrderDocumentJSON> dbData;
+    private AlertsFragment fragment;
+
+
     private String appName;
-
-
     private long timerTime = 0;
     //runs without a timer by reposting this handler at the end of the runnable
     Handler timerHandler = new Handler();
@@ -93,7 +101,6 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
             timerHandler.postDelayed(this, 500);
         }
     };
-
 
 
     @Override
@@ -134,13 +141,17 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
         mapView.getMapAsync(this);
 
         // alerts fragment
-        /*
-        if (alerts != null && alerts.length() > 0) {
-            CommonItemFragment fragment = CommonItemFragment.newInstance("alerts", alerts.toString());
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragment_holder_alerts, fragment).commit();
-        }
-        */
+        fragment = AlertsFragment.newInstance(null, null);
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.fragment_holder_orders, fragment).commit();
+
+        Log.v("ALERTS", String.valueOf(MonitorService.alerts.length()));
+
+
+        // WE DONT NEED THIS!! get data from DB -> get all active orders
+        // TODO: do this in background thread!
+        //int activeOrdersStatus = 1;
+        //dbData = DatabaseHandler.getOrders(activeOrdersStatus);
 
 
         // new service intent
@@ -180,6 +191,8 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
                     .addApi(LocationServices.API)
                     .build();
         }
+
+
 
     }
 
@@ -226,6 +239,11 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
         pressure = (TextView) findViewById(R.id.textView_pressure_value);
         pressure.setText(Double.toString(MonitorService.lastPressure));
         */
+
+        // update alerts
+        if (fragment != null) {
+            fragment.updateFragmentData(null);
+        }
 
     }
 
@@ -280,6 +298,7 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
             double lastPressure = intent.getDoubleExtra("lastPressure", -1);
             
             setLastValues(serviceRunning, lastTime, lastLat, lastLong, lastTemp, lastHumidity, lastPressure);
+            fragment.updateFragmentData(null);
             Log.v(TAG, "Service running: " + serviceRunning);
         }
     };
@@ -477,6 +496,12 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
         Date date = new Date(time);
         Format format = new SimpleDateFormat("HH:mm, dd.MM.yyyy");
         return format.format(date);
+    }
+
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
     }
 }
 

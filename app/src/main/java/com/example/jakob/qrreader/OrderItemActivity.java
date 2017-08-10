@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -133,6 +134,8 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
 
                 // hide 'add' button - we already have it stored locally
                 addBtn.setVisibility(View.GONE);
+
+                // TODO: hide Transport details button!
 
             } else {
                 // else get it from server
@@ -459,8 +462,10 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
             try {
                 JSONArray alertsArray = new JSONArray();
                 alertObj.put("id", odj.getId());
+                alertObj.put("title", odj.getTitle());
                 alertObj.put("minTemp", odj.getMinTemp());
                 alertObj.put("maxTemp", odj.getMaxTemp());
+                alertObj.put("lastValueOK", true);
                 alertObj.put("alerts", alertsArray);
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -474,6 +479,7 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
 
 
     public void onAddClick(View v) {
+        //Snackbar.make(v, "Saving Order Document!", Snackbar.LENGTH_LONG).show();
         saveToDB(data);     // TODO: this should not be on main thread?
         Intent intent = new Intent(this, Main2Activity.class);
 

@@ -156,7 +156,9 @@
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
                     android:layout_alignParentRight="true"
-                    style="@style/Widget.AppCompat.Button.Colored"
+                    android:fontFamily="sans-serif-condensed"
+                    style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                    android:textSize="20dp"
                     android:text="OPEN" />
 
             </RelativeLayout>
@@ -167,7 +169,7 @@
                 android:layout_marginLeft="-16dp"
                 android:layout_marginRight="-16dp"
                 android:layout_height="200dp"
-                android:layout_marginBottom="24dp" />
+                android:layout_marginBottom="36dp" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -185,27 +187,10 @@
             <FrameLayout
                 android:id="@+id/fragment_holder_orders"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
-            </FrameLayout>
-
-            <TextView
-                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAppearance="@style/TextAppearance.AppCompat.Large"
-                android:text="ALERTS"
-                android:textColor="@color/colorPrimary"
-                android:drawableLeft="@drawable/ic_error_outline_black_24px"
-                android:drawableTint="@color/colorPrimary"
-                android:fontFamily="sans-serif-condensed"
-                android:drawablePadding="32dp"
-                android:layout_marginBottom="24dp"
-                android:gravity="center_vertical"/>
-
-            <FrameLayout
-                android:id="@+id/fragment_holder_alerts"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
+                android:layout_marginBottom="16dp" >
             </FrameLayout>
+
 
         </LinearLayout>
     </ScrollView>

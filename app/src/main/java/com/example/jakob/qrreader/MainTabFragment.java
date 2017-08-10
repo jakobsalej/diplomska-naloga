@@ -70,8 +70,10 @@ public class MainTabFragment extends Fragment{
         dbData = getDataFromDB(position);
 
         // get temperature limits
-        if (position == 1) {
-            temperaturesData = getTempLimits(dbData);
+        // if there are orders already in progress when we start the app and monitor service is not yet running,
+        // add temp data (all orders added while monitor service is running will be added when created!)
+        if (!MonitorService.serviceRunning && position == 0) {
+            getTempLimits(dbData);
         }
 
         // dont get new data on onResume the first time (we already got data from onCreate)
@@ -98,10 +100,13 @@ public class MainTabFragment extends Fragment{
     }
 
 
-    private ArrayList<JSONObject> getTempLimits(ArrayList<OrderDocumentJSON> dbData) {
+    private void getTempLimits(ArrayList<OrderDocumentJSON> dbData) {
 
-        ArrayList<JSONObject> tempLimits = new ArrayList<>();
+        // empty the alerts first
+        // TODO: bad performance?
+        MonitorService.alerts = new JSONArray();
 
+        Log.v("DB", dbData.toString());
         for (OrderDocumentJSON order : dbData) {
             JSONObject obj = new JSONObject();
             try {
@@ -110,14 +115,16 @@ public class MainTabFragment extends Fragment{
                 obj.put("title", order.getTitle());
                 obj.put("minTemp", order.getMinTemp());
                 obj.put("maxTemp", order.getMaxTemp());
+                obj.put("lastValueOK", true);
                 obj.put("alerts", alertsArray);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            tempLimits.add(obj);
-        }
 
-        return tempLimits;
+            // add to alerts
+            MonitorService.alerts.put(obj);
+            Log.v("ALERTS", "alert added!: " + MonitorService.alerts.length());
+        }
     }
 
 
@@ -125,16 +132,20 @@ public class MainTabFragment extends Fragment{
     public void onResume() {
         super.onResume();
 
+
         // get new data from db
         if (updateDB) {
             dbData.clear();
             dbData.addAll(getDataFromDB(position));
             mAdapter.notifyDataSetChanged();
 
+
+
             if (!MonitorService.serviceRunning && position == 1) {
                 // if monitor service is not running yet, also update tempLimits
-                temperaturesData = getTempLimits(dbData);
+                getTempLimits(dbData);
             }
+
         }
 
         // enable getting new data from DB

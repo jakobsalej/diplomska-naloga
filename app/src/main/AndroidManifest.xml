@@ -22,7 +22,7 @@
             android:label="@string/add_new_doc_string"
             android:parentActivityName=".Main2Activity" />
         <activity android:name=".DisplayDataActivity" />
-        <activity android:name=".MainActivity"></activity>
+        <activity android:name=".MainActivity" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -46,8 +46,7 @@
         <activity
             android:name=".MonitoringActivity"
             android:label="Monitoring"
-            android:theme="@style/AppTheme.NoActionBar">
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar"></activity>
 
         <service
             android:name=".MonitorService"
@@ -60,14 +59,15 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".OrderItemActivity"
-            android:theme="@style/AppTheme.NoActionBar"
             android:launchMode="singleTop"
-            android:parentActivityName=".Main2Activity">
+            android:parentActivityName=".Main2Activity"
+            android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.jakob.qrreader.Main2Activity" />
@@ -80,6 +80,9 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.jakob.qrreader.OrderItemActivity" />
         </activity>
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/title_activity_settings"></activity>
     </application>
 
 </manifest>

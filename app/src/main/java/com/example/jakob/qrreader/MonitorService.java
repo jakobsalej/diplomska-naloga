@@ -334,6 +334,9 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
                     addAlert = false;
                 }
 
+                // add field that tells us if last value is OK
+                alert.put("lastValueOK", !addAlert);
+
                 if (addAlert) {
                     // create new Alert object and add it to order's alert list
                     JSONObject newAlertMsg = new JSONObject();
@@ -342,6 +345,7 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
                     newAlertMsg.put("location", location);
                     newAlertMsg.put("measurementValue", value);
                     alert.getJSONArray("alerts").put(newAlertMsg);
+
 
                     // show notification
                     int icon = R.drawable.ic_priority_high_white_24px;
