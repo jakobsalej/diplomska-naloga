@@ -13,6 +13,7 @@
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
         android:paddingTop="24dp"
+        android:clipToPadding="false"
         android:orientation="vertical">
 
         <TextView
@@ -184,6 +185,24 @@
             android:id="@+id/chart_first"
             android:layout_width="match_parent"
             android:layout_height="200dp"
+            android:layout_marginBottom="24dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+            android:textColor="@color/cardview_dark_background"
+            android:fontFamily="sans-serif"
+            android:text="Humidity (%)"
+            android:textStyle="bold"
+            android:drawablePadding="32dp"
+            android:layout_marginBottom="8dp"
+            android:gravity="center_vertical"/>
+
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/chart_second"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
             android:layout_marginBottom="48dp" />
 
         <TextView
@@ -198,6 +217,16 @@
             android:drawablePadding="32dp"
             android:layout_marginBottom="24dp"
             android:gravity="center_vertical"/>
+
+        <!--
+        <com.google.android.gms.maps.MapView
+            android:id="@+id/mapViewAlerts"
+            android:layout_width="match_parent"
+            android:layout_marginLeft="-16dp"
+            android:layout_marginRight="-16dp"
+            android:layout_height="240dp"
+            android:layout_marginBottom="24dp" />
+        -->
 
         <FrameLayout
             android:id="@+id/fragment_holder_alerts"

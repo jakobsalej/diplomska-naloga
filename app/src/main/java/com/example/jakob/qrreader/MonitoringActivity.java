@@ -116,6 +116,7 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
         // get views
         status = (TextView) findViewById(R.id.textView_service_status);
         temp = (TextView) findViewById(R.id.textView_temp_latest);
+        humidity = (TextView) findViewById(R.id.textView_humidity_latest);
         timeRunning = (TextView) findViewById(R.id.textView_time_running);
         startTime = (TextView) findViewById(R.id.textView_start_time);
         lastUpdateTime = (TextView) findViewById(R.id.textView_last_update_time);
@@ -231,6 +232,7 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
         }
         startTime.setText(convertTime(MonitorService.startTime));
         temp.setText("Latest temperature: " + Double.toString(MonitorService.lastTemp) + " °C");
+        humidity.setText("Latest humidity: " + Double.toString(MonitorService.lastHumidity) + " %");
         location.setText(Double.toString(MonitorService.lastLat) + ", " + Double.toString(MonitorService.lastLon));
 
         /*
@@ -308,6 +310,7 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
         // TODO: also set service running??
         //startTime.setText(lastTime);
         temp.setText("Latest temperature: " + Double.toString(lastTemp) + " °C");
+        humidity.setText("Latest humidity: " + Double.toString(lastHumidity) + " %");
         location.setText(Double.toString(lastLat) + ", " + Double.toString(lastLon));
         //humidity.setText(Double.toString(lastHumidity));
         //pressure.setText(Double.toString(lastPressure));

@@ -17,6 +17,10 @@ import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMapOptions;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -28,13 +32,17 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static android.R.attr.entries;
 import static android.R.attr.fragment;
+import static android.graphics.Color.rgb;
 
 
-public class TransportDetailsActivity extends AppCompatActivity implements CommonItemFragment.OnFragmentInteractionListener{
+public class TransportDetailsActivity extends AppCompatActivity implements CommonItemFragment.OnFragmentInteractionListener, OnMapReadyCallback {
 
-    private LineChart lc;
+    private LineChart lc, lc2;
     private long baseTime;
+    private MapView mapView;
+    private GoogleMap map;
     private TextView textViewDelivered, textViewStarted, textViewEnded, textViewDuration,
             textViewVehicle, textViewDriver, textViewComment;
     private JSONArray alertsArray;
@@ -52,6 +60,7 @@ public class TransportDetailsActivity extends AppCompatActivity implements Commo
         setContentView(R.layout.activity_transport_details);
 
         lc = (LineChart) findViewById(R.id.chart_first);
+        lc2 = (LineChart) findViewById(R.id.chart_second);
         textViewDelivered = (TextView) findViewById(R.id.textView_delivered);
         textViewStarted = (TextView) findViewById(R.id.textView_time_started);
         textViewEnded = (TextView) findViewById(R.id.textView_time_ended);
@@ -59,6 +68,17 @@ public class TransportDetailsActivity extends AppCompatActivity implements Commo
         textViewVehicle = (TextView) findViewById(R.id.textView_vehicle_info);
         textViewDriver = (TextView) findViewById(R.id.textView_driver_info);
         textViewComment = (TextView) findViewById(R.id.textView_comment);
+
+        // MAP
+        GoogleMapOptions options = new GoogleMapOptions();
+        options.ambientEnabled(true)
+                .scrollGesturesEnabled(true);
+
+        /*
+        mapView = (MapView) findViewById(mapViewAlerts);
+        mapView.onCreate(null);
+        mapView.getMapAsync(this);
+        */
 
         Intent intent = getIntent();
         String data = intent.getStringExtra("transport");
@@ -97,7 +117,8 @@ public class TransportDetailsActivity extends AppCompatActivity implements Commo
             e.printStackTrace();
         }
 
-        List<Entry> entries = new ArrayList<Entry>();
+        List<Entry> entriesTemperature = new ArrayList<Entry>();
+        List<Entry> entriesHumidity = new ArrayList<Entry>();
         for (int i = 0; i < measurements.length(); i++) {
             // turn your data into Entry objects
             try {
@@ -109,16 +130,17 @@ public class TransportDetailsActivity extends AppCompatActivity implements Commo
 
                 String time = convertTime(obj.getLong("time"));
                 Log.v("TIME", time);
-                entries.add(new Entry(obj.getLong("time") - baseTime, (float) obj.getJSONObject("weather").getDouble("temperature")));
+                entriesTemperature.add(new Entry(obj.getLong("time") - baseTime, (float) obj.getJSONObject("weather").getDouble("temperature")));
+                entriesHumidity.add(new Entry(obj.getLong("time") - baseTime, (float) obj.getJSONObject("weather").getDouble("humidity")));
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
 
-        Log.v("ENTRIES", String.valueOf(entries));
-        Log.v("COMPARISON", String.valueOf(entries.size()) + " " + measurements.length());
+        Log.v("ENTRIES", String.valueOf(entriesTemperature));
+        Log.v("COMPARISON", String.valueOf(entriesTemperature.size()) + " " + measurements.length());
 
-        // CHART SETTINGS
+        // CHART SETTINGS TEMP CHART
         lc.getDescription().setEnabled(false);
         lc.getLegend().setEnabled(false);
         lc.setDrawGridBackground(false);
@@ -152,22 +174,59 @@ public class TransportDetailsActivity extends AppCompatActivity implements Commo
         x.setPosition(XAxis.XAxisPosition.BOTTOM);
 
         // data set
-        LineDataSet dataSet = new LineDataSet(entries, "Temperature over time"); // add entries to dataset
-        dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
-        //dataSet.setDrawFilled(true);
-        dataSet.setDrawCircles(false);
-        dataSet.setLineWidth(2f);
-        //dataSet.setColor(Color.rgb(244, 117, 117));
-        //dataSet.setFillColor(Color.BLUE);
-        //dataSet.setFillAlpha(100);
-        dataSet.setDrawHorizontalHighlightIndicator(false);
-        dataSet.setDrawVerticalHighlightIndicator(false);
-        dataSet.setDrawValues(false);
+        LineDataSet dataSetTemp = new LineDataSet(entriesTemperature, "Temperature over time"); // add entriesTemperature to dataset
+        dataSetTemp.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+        //dataSetTemp.setDrawFilled(true);
+        dataSetTemp.setDrawCircles(false);
+        dataSetTemp.setLineWidth(2f);
+        dataSetTemp.setColor(rgb(3,169,244));
+        //dataSetTemp.setFillColor(Color.BLUE);
+        //dataSetTemp.setFillAlpha(100);
+        dataSetTemp.setDrawHorizontalHighlightIndicator(false);
+        dataSetTemp.setDrawVerticalHighlightIndicator(false);
+        dataSetTemp.setDrawValues(false);
 
-        LineData lineData = new LineData(dataSet);
+        LineData lineData = new LineData(dataSetTemp);
         lc.setData(lineData);
         lc.invalidate(); // refresh
 
+
+        // CHART SETTINGS HUMIDITY CHART
+        lc2.getDescription().setEnabled(false);
+        lc2.getLegend().setEnabled(false);
+        lc2.setDrawGridBackground(false);
+        lc2.getAxisRight().setEnabled(false);
+
+        // Y-axis
+        YAxis y2 = lc2.getAxisLeft();
+        y2.setDrawGridLines(false);
+        y2.setAxisMinimum(0);
+        y2.setAxisMaximum(100);
+        
+        // X-axis
+        XAxis x2 = lc2.getXAxis();
+        x2.setValueFormatter(new DateAxisValueFormatter(null, baseTime));
+        x2.setDrawGridLines(false);
+        x2.setPosition(XAxis.XAxisPosition.BOTTOM);
+
+        // data set
+        LineDataSet dataSetHum = new LineDataSet(entriesHumidity, "Humidity level over time"); // add entriesTemperature to dataset
+        dataSetHum.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+        dataSetHum.setDrawFilled(true);
+        dataSetHum.setDrawCircles(false);
+        dataSetHum.setLineWidth(2f);
+        dataSetHum.setColor(rgb(3,169,244));
+        dataSetHum.setFillColor(rgb(3,169,244));
+        dataSetHum.setFillAlpha(100);
+        dataSetHum.setDrawHorizontalHighlightIndicator(false);
+        dataSetHum.setDrawVerticalHighlightIndicator(false);
+        dataSetHum.setDrawValues(false);
+
+        LineData lineData2 = new LineData(dataSetHum);
+        lc2.setData(lineData2);
+        lc2.invalidate(); // refresh
+        
+        
         // alerts fragment
         if (alertsArray != null && alertsArray.length() > 0) {
             CommonItemFragment fragment = CommonItemFragment.newInstance("alerts", alertsArray.toString());
@@ -213,5 +272,11 @@ public class TransportDetailsActivity extends AppCompatActivity implements Commo
         Date date = new Date(time);
         Format format = new SimpleDateFormat("HH:mm, dd.MM.yyyy");
         return format.format(date);
+    }
+
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+
     }
 }

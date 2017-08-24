@@ -27,7 +27,7 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="170dp"
+                android:layout_height="wrap_content"
                 android:paddingLeft="16dp"
                 android:paddingRight="16dp"
                 android:paddingTop="16dp"
@@ -74,6 +74,18 @@
                     android:text="Latest temperature: Not available"
                     android:textColor="@color/cardview_dark_background"
                     android:fontFamily="sans-serif-light"
+                    android:layout_marginBottom="8dp"
+                    android:gravity="center_horizontal" />
+
+                <TextView
+                    android:id="@+id/textView_humidity_latest"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                    android:text="Latest humidity: Not available"
+                    android:textColor="@color/cardview_dark_background"
+                    android:fontFamily="sans-serif-light"
+                    android:layout_marginBottom="16dp"
                     android:gravity="center_horizontal" />
 
             </LinearLayout>
