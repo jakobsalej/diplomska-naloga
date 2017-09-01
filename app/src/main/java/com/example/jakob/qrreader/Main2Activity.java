@@ -1,6 +1,8 @@
 package com.example.jakob.qrreader;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -46,10 +48,19 @@ public class Main2Activity extends AppCompatActivity {
     private ViewPager mViewPager;
     public static SQLiteDatabase db;
     public JSONArray ongoingOrders;
+    public static String preferenceKey = "com.example.jakob.qrreader.PREFERENCE_KEY";
+    SharedPreferences sharedPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // shared preference file for storing data
+        sharedPref = this.getSharedPreferences(preferenceKey, Context.MODE_PRIVATE);
+
+        // check if user is already logged in
+        checkIfUserLoggedIn();
+
         setContentView(R.layout.activity_main2);
 
         // prepare DB
@@ -72,6 +83,19 @@ public class Main2Activity extends AppCompatActivity {
         tabLayout.getTabAt(0).setIcon(R.drawable.ic_local_shipping_white_36px);
         tabLayout.getTabAt(1).setIcon(R.drawable.ic_check_circle_white_24px);
         tabLayout.getTabAt(2).setIcon(R.drawable.ic_history_white_24px);
+    }
+
+
+    private void checkIfUserLoggedIn() {
+
+        String user = sharedPref.getString("user", null);
+        Log.v("USER", "this is user:" + user);
+        if (user == null) {
+            Intent intent = new Intent(this, LoginActivity.class);
+            // clear back button stack
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        }
     }
 
 
