@@ -117,17 +117,28 @@ public class Main2Activity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                //newGame();
+                return true;
+            case R.id.action_logout:
+                logoutUser();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
+    }
 
-        return super.onOptionsItemSelected(item);
+
+    private void logoutUser() {
+        // remove user credentials from shared prefs
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.remove("user");
+        editor.commit();
+
+        // go to login screen immediately
+        checkIfUserLoggedIn();
     }
 
 
