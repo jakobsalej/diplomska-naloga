@@ -17,10 +17,16 @@ import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMapOptions;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,9 +38,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static android.R.attr.data;
 import static android.R.attr.entries;
 import static android.R.attr.fragment;
 import static android.graphics.Color.rgb;
+import static android.os.Build.VERSION_CODES.N;
 
 
 public class TransportDetailsActivity extends AppCompatActivity implements CommonItemFragment.OnFragmentInteractionListener, OnMapReadyCallback {
@@ -46,6 +54,7 @@ public class TransportDetailsActivity extends AppCompatActivity implements Commo
     private TextView textViewDelivered, textViewStarted, textViewEnded, textViewDuration,
             textViewVehicle, textViewDriver, textViewComment;
     private JSONArray alertsArray;
+    private String data;
 
 
     @Override
@@ -74,14 +83,13 @@ public class TransportDetailsActivity extends AppCompatActivity implements Commo
         options.ambientEnabled(true)
                 .scrollGesturesEnabled(true);
 
-        /*
-        mapView = (MapView) findViewById(mapViewAlerts);
-        mapView.onCreate(null);
-        mapView.getMapAsync(this);
-        */
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.mapF);
+        mapFragment.getMapAsync(this);
+
 
         Intent intent = getIntent();
-        String data = intent.getStringExtra("transport");
+        data = intent.getStringExtra("transport");
         double minTemp = intent.getDoubleExtra("minTemp", -10);
         double maxTemp = intent.getDoubleExtra("maxTemp", 30);
         Log.v("TRANSPORT", data);
@@ -235,6 +243,7 @@ public class TransportDetailsActivity extends AppCompatActivity implements Commo
         }
     }
 
+
     private void setTextData(int delivered, long startDate, long endDate, long duration, String vehicleData, String driverInfo, String comment) {
 
         // delivered status
@@ -276,7 +285,49 @@ public class TransportDetailsActivity extends AppCompatActivity implements Commo
 
 
     @Override
-    public void onMapReady(GoogleMap googleMap) {
+    public void onMapReady(GoogleMap map) {
+        LatLng lj = new LatLng(46.0569, 14.5058);
+        map.moveCamera(CameraUpdateFactory.newLatLng(lj));
+
+        // display alerts
+        addAlertsToMap(map);
 
     }
+
+
+    private void addAlertsToMap(GoogleMap map) {
+
+        // bounds
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+
+        try {
+            JSONObject obj = new JSONObject(data);
+            JSONArray alerts = obj.getJSONArray("alerts");
+
+            for (int i = 0; i < alerts.length(); i++) {
+                JSONObject alert = alerts.getJSONObject(i);
+                JSONObject loc = alert.getJSONObject("location");
+                loc.getDouble("x");
+
+                LatLng position = new LatLng(loc.getDouble("x"), loc.getDouble("y"));
+                map.addMarker(new MarkerOptions()
+                        .position(position)
+                        .title("ALERT " + (i+1))
+                        .snippet("Temp: " + alert.getDouble("measurementValue"))
+                );
+
+                builder.include(position);
+            }
+
+            LatLngBounds bounds = builder.build();
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 300);
+            map.animateCamera(cameraUpdate);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
 }

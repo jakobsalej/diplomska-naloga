@@ -94,6 +94,8 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
     @Override
     protected void onHandleIntent(Intent workIntent) {
 
+        serviceRunning = true;
+
         connectToGoogleApiClient();
         startTime = new Date().getTime();
 
@@ -114,7 +116,7 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
 
     private void connectToGoogleApiClient() {
 
-        serviceRunning = true;
+        Log.v(TAG, "Connecting to google service.");
 
         // Create an instance of GoogleAPIClient.
         if (mGoogleApiClient == null) {

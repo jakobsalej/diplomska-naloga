@@ -43,6 +43,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMapOptions;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -77,7 +78,6 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
     public static boolean serviceRunning = false;
     private int notificationId = 0;
     private TextView status, timeRunning, startTime, lastUpdateTime, temp, humidity, pressure, lat, lng, location;
-    private MapView mapView;
     private GoogleMap map;
     private ArrayList<OrderDocumentJSON> dbData;
     private AlertsFragment fragment;
@@ -97,7 +97,6 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
             seconds = seconds % 60;
 
             timeRunning.setText(String.format("%d:%02d", minutes, seconds));
-
             timerHandler.postDelayed(this, 500);
         }
     };
@@ -137,9 +136,9 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
         options.ambientEnabled(true)
                 .scrollGesturesEnabled(true);
 
-        mapView = (MapView) findViewById(R.id.mapView);
-        mapView.onCreate(null);
-        mapView.getMapAsync(this);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.mapMonitoring);
+        mapFragment.getMapAsync(this);
 
         // alerts fragment
         fragment = AlertsFragment.newInstance(null, null);
@@ -202,21 +201,21 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
         super.onStart();
         mGoogleApiClient.connect();
         createLocationRequest();
-        mapView.onStart();
+        //mapView.onStart();
     }
 
 
     protected void onStop() {
         super.onStop();
         mGoogleApiClient.disconnect();
-        mapView.onStop();
+        //mapView.onStop();
     }
 
 
     @Override
     protected void onResume() {
         super.onResume();
-        mapView.onResume();
+        //mapView.onResume();
         Log.v(TAG, "On resume!!");
 
         // Register for the particular broadcast based on ACTION string
@@ -253,7 +252,7 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
     @Override
     protected void onPause() {
         super.onPause();
-        mapView.onPause();
+        //mapView.onPause();
         // Unregister the listener when the application is paused
         LocalBroadcastManager.getInstance(this).unregisterReceiver(monitorReceiver);
     }
@@ -262,14 +261,14 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mapView.onDestroy();
+        //mapView.onDestroy();
     }
 
 
     @Override
     public void onLowMemory() {
         super.onLowMemory();
-        mapView.onLowMemory();
+        //mapView.onLowMemory();
     }
 
 
@@ -486,12 +485,9 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
 
 
     @Override
-    public void onMapReady(GoogleMap googleMap) {
-        // TODO: add real markers from JSON (and show path between them)
-        map = googleMap;
-        googleMap.addMarker(new MarkerOptions()
-                .position(new LatLng(0, 0))
-                .title("Marker"));
+    public void onMapReady(GoogleMap map) {
+        LatLng lj = new LatLng(46.0569, 14.5058);
+        map.moveCamera(CameraUpdateFactory.newLatLng(lj));
     }
 
 

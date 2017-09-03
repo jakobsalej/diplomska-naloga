@@ -88,6 +88,7 @@ public class AlertsFragment extends Fragment {
         if (data != null) {
             try {
                 items = new JSONArray(data);
+                Log.v("ALERT ITEMS", String.valueOf(items));
             } catch (JSONException e) {
                 e.printStackTrace();
             }

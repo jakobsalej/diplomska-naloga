@@ -10,6 +10,7 @@ import android.util.Log;
 import com.example.jakob.qrreader.Main2Activity;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import database.OrderDocumentJSONHelper.OrderDocumentJSONEntry;
@@ -21,7 +22,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     // app's database for storing data we want to retain during reopening
 
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 41;
+    public static final int DATABASE_VERSION = 44;
     public static final String DATABASE_NAME = "db";
     private static final String TAG = "DatabaseHandler";
 
@@ -79,7 +80,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(OrderDocumentJSONEntry.COLUMN_NAME_DATA, od.getData());
         values.put(OrderDocumentJSONEntry.COLUMN_NAME_STATUS, od.getStatus());
         values.put(OrderDocumentJSONEntry.COLUMN_NAME_DELIVERED, od.getDelivered());
-        values.put(OrderDocumentJSONEntry.COLUMN_NAME_DATE, od.getDate());
+        values.put(OrderDocumentJSONEntry.COLUMN_NAME_DATE, new Date().getTime());      // date added to local DB
         values.put(OrderDocumentJSONEntry.COLUMN_NAME_START_LOCATION, od.getStartLocation());
         values.put(OrderDocumentJSONEntry.COLUMN_NAME_END_LOCATION, od.getEndLocation());
         values.put(OrderDocumentJSONEntry.COLUMN_NAME_MIN_TEMP, od.getMinTemp());
@@ -175,7 +176,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         } else {
             // get back documents based on status
             selectQuery = "SELECT  * FROM " + OrderDocumentJSONEntry.TABLE_NAME + " WHERE " +
-                    OrderDocumentJSONEntry.COLUMN_NAME_STATUS+ "=" + status;
+                    OrderDocumentJSONEntry.COLUMN_NAME_STATUS+ "=" + status + " ORDER BY " +
+                    OrderDocumentJSONEntry.COLUMN_NAME_DATE + " DESC";
         }
         SQLiteDatabase db = Main2Activity.db;
         Cursor cursor = db.rawQuery(selectQuery, null);

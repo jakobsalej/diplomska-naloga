@@ -72,7 +72,14 @@ public class MainTabFragment extends Fragment{
         // get temperature limits
         // if there are orders already in progress when we start the app and monitor service is not yet running,
         // add temp data (all orders added while monitor service is running will be added when created!)
-        if (!MonitorService.serviceRunning && position == 0) {
+        //if (!MonitorService.serviceRunning && position == 0) {
+        //    getTempLimits(dbData);
+        //}
+
+        // if monitor service doesn't have alerts for every active order
+        // (for example, that happens if we add orders and then kill app)
+        // delete all alerts and add them again from active orders
+        if (position == 0 && dbData.size() != MonitorService.alerts.length()){
             getTempLimits(dbData);
         }
 
@@ -140,11 +147,12 @@ public class MainTabFragment extends Fragment{
             mAdapter.notifyDataSetChanged();
 
 
-
+            /*
             if (!MonitorService.serviceRunning && position == 1) {
                 // if monitor service is not running yet, also update tempLimits
                 getTempLimits(dbData);
             }
+            */
 
         }
 
