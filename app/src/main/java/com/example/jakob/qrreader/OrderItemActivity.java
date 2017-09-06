@@ -119,23 +119,32 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
             // hide 'add' button - we already have it stored locally
             addBtn.setVisibility(View.GONE);
 
-            // show transportDetails button
-            transportDetailsBtn.setVisibility(View.VISIBLE);
-
         } else {
             String id = intent.getStringExtra("id");
 
             // check if we already have order with that ID locally
             OrderDocumentJSON od = DatabaseHandler.getOrder(Integer.parseInt(id));
             if (od != null) {
+                // we do have that doc already!
+                Log.v("DB", "We have this ID already");
+
+                // if service is running and we scanned an ID of order in progress, stop it
+                if (MonitorService.serviceRunning && od.getStatus() == 1) {
+                    MonitorService.saveMeasurements(od.getId());
+
+                    // now that transport data is saved, get order again from DB (to get all that saved data)
+                    od = DatabaseHandler.getOrder(Integer.parseInt(id));
+                    Log.v("DB", "Saved transport data! " + od.getMeasurements());
+                    measurementsData = od.getMeasurements();
+                    setMeasuremntsViewData(null);
+                }
+
                 // if we do, set view
                 setViewData(od.getData());
                 setMeasuremntsViewData(od.getMeasurements());
 
                 // hide 'add' button - we already have it stored locally
                 addBtn.setVisibility(View.GONE);
-
-                // TODO: hide Transport details button!
 
             } else {
                 // else get it from server
@@ -145,8 +154,8 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
     }
 
     private void setMeasuremntsViewData(String measurementsData) {
-        minTemp = 10;
-        maxTemp = 30;
+        minTemp = 5;
+        maxTemp = 11;
     }
 
 
@@ -189,6 +198,8 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
                     break;
                 case 2:
                     statusMsg = "Finished";
+                    // show transportDetails button
+                    transportDetailsBtn.setVisibility(View.VISIBLE);
                     break;
                 default:
                     statusMsg = "Unknown";
@@ -224,8 +235,8 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
 
             // temp range
             // TODO: get from DB
-            double minT = 15;
-            double maxT = 30;
+            double minT = 5;
+            double maxT = 11;
             minTemp = minT;
             maxTemp = maxT;
             tempRangeTextView.setText(String.valueOf(minTemp) + " °C - " + String.valueOf(maxTemp) + " °C");
@@ -433,8 +444,8 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
                     + obj.getJSONObject("startLocation").getString("y");
             String endLocation = obj.getJSONObject("endLocation").getString("x") + ","
                     + obj.getJSONObject("endLocation").getString("y");
-            double minTemp = 0;         // TODO: get it from DB
-            double maxTemp = 10;        // TODO: get it from DB
+            double minTemp = 5;         // TODO: get it from DB
+            double maxTemp = 11;        // TODO: get it from DB
             int delivered = 0;          // when we add it, its not yet delivered
             String measurements = "measurements placeholder";
             OrderDocumentJSON  odj = new OrderDocumentJSON(

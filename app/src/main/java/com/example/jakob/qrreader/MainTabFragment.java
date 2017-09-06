@@ -4,6 +4,7 @@ package com.example.jakob.qrreader;
  * Created by jakob on 7/16/17.
  */
 
+import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -14,6 +15,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -29,12 +33,14 @@ import database.DatabaseHandler;
 import database.OrderDocument;
 import database.OrderDocumentJSON;
 
+import static android.R.attr.logo;
 import static android.R.attr.order;
+import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
 import static android.os.Build.VERSION_CODES.M;
 import static database.DatabaseHandler.getOrders;
 
 
-public class MainTabFragment extends Fragment{
+public class MainTabFragment extends Fragment implements View.OnClickListener{
 
     private RecyclerView mRecyclerView;
     private RecyclerAdapter mAdapter;
@@ -44,6 +50,11 @@ public class MainTabFragment extends Fragment{
     public static ArrayList<JSONObject> temperaturesData;
     private int position;
     private boolean updateDB = true;
+    private View view;
+    private CardView mCardMonitoringStatus;
+    private RelativeLayout help;
+    private TextView cardText;
+    private Button btnMonitoring;
 
     public MainTabFragment() {
         // Required empty public constructor
@@ -58,7 +69,15 @@ public class MainTabFragment extends Fragment{
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        final View view = inflater.inflate(R.layout.fragment_main_tab, container, false);
+        view = inflater.inflate(R.layout.fragment_main_tab, container, false);
+        mCardMonitoringStatus = (CardView) view.findViewById(R.id.monitoring_status_card);
+        help = (RelativeLayout) view.findViewById(R.id.help_layout);
+        cardText = (TextView) view.findViewById(R.id.textView_status_running);
+        btnMonitoring = (Button) view.findViewById(R.id.button_start_monitor);
+
+        // scan vehicle button
+        Button b = (Button) view.findViewById(R.id.button_scan_vehicle);
+        b.setOnClickListener(this);
 
         // prepare DB
         DatabaseHandler mDbHelper = new DatabaseHandler(getActivity());
@@ -68,13 +87,6 @@ public class MainTabFragment extends Fragment{
         final Bundle args = getArguments();
         position = args.getInt("position");
         dbData = getDataFromDB(position);
-
-        // get temperature limits
-        // if there are orders already in progress when we start the app and monitor service is not yet running,
-        // add temp data (all orders added while monitor service is running will be added when created!)
-        //if (!MonitorService.serviceRunning && position == 0) {
-        //    getTempLimits(dbData);
-        //}
 
         // if monitor service doesn't have alerts for every active order
         // (for example, that happens if we add orders and then kill app)
@@ -89,11 +101,7 @@ public class MainTabFragment extends Fragment{
         // recycler view
         mRecyclerView = (RecyclerView) view.findViewById(R.id.ongoing_recycler_view);
 
-        // monitoring status card show only on ongoing tab
-        CardView mCardMonitoringStatus = (CardView) view.findViewById(R.id.monitoring_status_card);
-        if (position > 0 || dbData.size() == 0) {
-            mCardMonitoringStatus.setVisibility(View.GONE);
-        }
+
 
         // use a linear layout manager
         mLayoutManager = new LinearLayoutManager(getActivity());
@@ -145,19 +153,29 @@ public class MainTabFragment extends Fragment{
             dbData.clear();
             dbData.addAll(getDataFromDB(position));
             mAdapter.notifyDataSetChanged();
-
-
-            /*
-            if (!MonitorService.serviceRunning && position == 1) {
-                // if monitor service is not running yet, also update tempLimits
-                getTempLimits(dbData);
-            }
-            */
-
         }
 
         // enable getting new data from DB
         updateDB = true;
+
+
+        // monitoring status card show only on ongoing tab
+        if (position > 0 || dbData.size() == 0) {
+            mCardMonitoringStatus.setVisibility(View.GONE);
+        } else if (dbData.size() > 0 && MonitorService.serviceRunning) {
+            TextView cardText = (TextView) view.findViewById(R.id.textView_status_running);
+            cardText.setText("MONITORING IN PROGRESS");
+            Button btnMonitoring = (Button) view.findViewById(R.id.button_start_monitor);
+            btnMonitoring.setText("Open");
+        } else if (dbData.size() > 0 && !MonitorService.serviceRunning) {
+            cardText.setText("MONITORING IS NOT RUNNING");
+            btnMonitoring.setText("Start");
+        }
+
+        // show help only on first tab if there are no orders
+        if (position > 0 || dbData.size() > 0) {
+            help.setVisibility(View.GONE);
+        }
     }
 
 
@@ -172,6 +190,23 @@ public class MainTabFragment extends Fragment{
             return getOrders(2);
         } else {
             return getOrders(3);
+        }
+    }
+
+
+    private void scanVehicleQR() {
+        Intent intent = new Intent(this.getActivity(), ReadQRActivity.class);
+        intent.putExtra("title", "Add vehicle info");
+        intent.putExtra("text", "To add vehicle info, please scan its QR code or manually enter vehicle's registration number.");
+        startActivity(intent);
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.button_scan_vehicle:
+                scanVehicleQR();
+                break;
         }
     }
 

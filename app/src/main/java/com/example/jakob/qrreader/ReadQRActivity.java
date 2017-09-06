@@ -35,6 +35,18 @@ public class ReadQRActivity extends AppCompatActivity {
         setContentView(R.layout.activity_read_qr);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        // get intent and set text if available
+        Intent intent = getIntent();
+        String title = intent.getStringExtra("title");
+        String textData = intent.getStringExtra("text");
+        if (title != null) {
+            getSupportActionBar().setTitle(title);
+        }
+        if (textData != null) {
+            TextView tv = (TextView) findViewById(R.id.code_info);
+            tv.setText(textData);
+        }
+
         final SurfaceView cameraView = (SurfaceView) findViewById(R.id.camera_view);
 
         // new instance of barcode detector...

@@ -11,7 +11,10 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 
+import java.text.Format;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import database.OrderDocumentJSON;
 
@@ -42,7 +45,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemHo
         public void bindItem(OrderDocumentJSON od) {
             mItem = od;
             mItemTitle.setText(od.getTitle());
-            mItemText.setText(od.getDate());
+            mItemText.setText(convertTime(Long.parseLong(od.getDate())));
         }
 
         @Override
@@ -56,6 +59,13 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemHo
             showItemIntent.putExtra("measurements", mItem.getMeasurements());
             context.startActivity(showItemIntent);
 
+        }
+
+
+        public String convertTime(long time){
+            Date date = new Date(time);
+            Format format = new SimpleDateFormat("HH:mm, dd.MM.yyyy");
+            return format.format(date);
         }
     }
 
@@ -80,4 +90,5 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemHo
     public int getItemCount() {
         return mItems.size();
     }
+
 }

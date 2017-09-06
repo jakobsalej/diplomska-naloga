@@ -18,9 +18,12 @@
             android:layout_margin="8dp" >
 
                 <TextView
+                    android:id="@+id/textView_status_running"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Monitoring is currently not running"
+                    android:text="MONITORING IS NOT RUNNING"
+                    android:fontFamily="sans-serif-condensed"
+                    android:textStyle="bold"
                     android:textColor="@android:color/white"
                     style="@style/Base.TextAppearance.Widget.AppCompat.Toolbar.Title"
                     android:paddingLeft="8dp"
@@ -42,7 +45,7 @@
                     android:layout_height="wrap_content"
                     android:text="Start"
                     android:textSize="16sp"
-                    android:textColor="@color/colorPrimary"
+                    android:textColor="@android:color/white"
                     android:layout_gravity="end|center"
                     style="@style/Widget.AppCompat.Button.Borderless"
                     android:onClick="startMonitoring"/>
@@ -61,6 +64,112 @@
 
         <!-- A RecyclerView with some commonly used attributes -->
 
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none" >
+
+            <RelativeLayout
+                android:id="@+id/help_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginTop="16dp">
+
+                <TextView
+                    android:id="@+id/textView4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginBottom="16dp"
+                    android:fontFamily="sans-serif-condensed"
+                    android:text="To add new ORDER:" />
+
+                <TextView
+                    android:id="@+id/textView7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginBottom="16dp"
+                    android:layout_below="@+id/button_scan_vehicle"
+                    android:fontFamily="sans-serif-condensed"
+                    android:text="- then press a round button in bottom right corner with a + sign" />
+
+                <Button
+                    android:id="@+id/button_scan_vehicle"
+                    style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_below="@+id/textView12"
+                    android:layout_marginBottom="8dp"
+                    android:text="Add vehicle info" />
+
+                <TextView
+                    android:id="@+id/textView8"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:fontFamily="sans-serif-condensed"
+                    android:text="- new window will open, where you can scan ORDER's QR code"
+                    android:layout_below="@+id/textView7"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true" />
+
+                <TextView
+                    android:id="@+id/textView9"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:fontFamily="sans-serif-condensed"
+                    android:text="- after you add ORDER, you can start monitoring by pressing button START"
+                    android:layout_below="@+id/textView8"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true" />
+
+                <TextView
+                    android:id="@+id/textView10"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:fontFamily="sans-serif-condensed"
+                    android:text="- to add another ORDER, simply tap button with a + sign again"
+                    android:layout_below="@+id/textView9"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true" />
+
+                <TextView
+                    android:id="@+id/textView11"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:fontFamily="sans-serif-condensed"
+                    android:text="- to stop monitoring, press a button with a stop sign on monitoring screen and scan ORDER's QR code again"
+                    android:layout_below="@+id/textView10"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true" />
+
+                <TextView
+                    android:id="@+id/textView12"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_below="@+id/textView4"
+                    android:layout_marginBottom="8dp"
+                    android:fontFamily="sans-serif-condensed"
+                    android:text="- first add info about your vehicle by scaning its QR code" />
+            </RelativeLayout>
+
+        </ScrollView>
+
         <android.support.v7.widget.RecyclerView
             android:id="@+id/ongoing_recycler_view"
             android:scrollbars="vertical"
@@ -70,7 +179,6 @@
         </android.support.v7.widget.RecyclerView>
 
     </LinearLayout>
-
 
 
 </RelativeLayout>

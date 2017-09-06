@@ -351,7 +351,7 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
 
                     // show notification
                     int icon = R.drawable.ic_priority_high_white_24px;
-                    showNotification("Warning!", alertMsg, icon);
+                    showNotification(MonitoringActivity.appName, "Warning! " + alertMsg, icon);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -385,7 +385,7 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
         Log.v(TAG, "Stopping service!");
 
         // save measurements
-        saveMeasurements();
+        //saveMeasurements();
 
         mGoogleApiClient.disconnect();
         serviceRunning = false;
@@ -394,55 +394,52 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
     }
 
 
-    private void saveMeasurements() {
+    public static void saveMeasurements(int id) {
 
         long endTime = new Date().getTime();
         int endIndex = getMeasurementsLength();
-
-        // get all still active (='in progress') orderDocuments from local DB and add measurements' subarray
-        int status = 1;
         int doneStatus = 2;
-        ArrayList<OrderDocumentJSON> orders = DatabaseHandler.getOrders(status);
-        Log.v("ORDERS", String.valueOf(orders.size()));
-        for(OrderDocumentJSON ord : orders) {
-            int startIndex = ord.getStartIndex();
-            ord.setEndIndex(endIndex);
-            JSONArray measurements = getMeasurements(startIndex, endIndex);
 
-            // get startTime from the first measurement
-            long startTime = 0;
-            if (measurements.length() > 0) {
-                try {
-                    startTime = measurements.getJSONObject(0).getLong("time");      // TODO: use last one?
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+        // get order from DB
+        OrderDocumentJSON ord = DatabaseHandler.getOrder(id);
+        int startIndex = ord.getStartIndex();
+        ord.setEndIndex(endIndex);
+        JSONArray measurements = getMeasurements(startIndex, endIndex);
+
+        // get startTime from the first measurement
+        long startTime = 0;
+        if (measurements.length() > 0) {
+            try {
+                startTime = measurements.getJSONObject(0).getLong("time");      // TODO: use last one?
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-
-            // update status + also update values in JSON string 'data'
-            ord.setStatus(doneStatus);
-            ord.setNewJSONValue("status", String.valueOf(doneStatus), 1);
-
-            // get alerts for this order
-            JSONArray alertMsgs = getAlertMessages(ord.getId());
-
-            // TODO: set this somehow (was it successfully delivered?)
-            int delivered = 1;
-
-            // create new object transport
-            JSONObject tr = addNewTransportObject(ord.getId(), measurements, alertMsgs, startTime, endTime, delivered);
-            ord.setMeasurements(tr.toString());
-            //ord.setNewJSONValue("transport", tr.toString(), 0);
-
-            Log.v("Measurements", ord.getMeasurements());
-
-            // TODO: create new transport entry, get it's id and save it to 'transport' field in json
-
-            int res = DatabaseHandler.updateOrder(ord);       // UPDATE
         }
+
+        // update status + also update values in JSON string 'data'
+        ord.setStatus(doneStatus);
+        ord.setNewJSONValue("status", String.valueOf(doneStatus), 1);
+
+        // get alerts for this order
+        JSONArray alertMsgs = getAlertMessages(ord.getId());
+
+        // TODO: set this somehow (was it successfully delivered?)
+        int delivered = 1;
+
+        // create new object transport
+        JSONObject tr = addNewTransportObject(ord.getId(), measurements, alertMsgs, startTime, endTime, delivered);
+        ord.setMeasurements(tr.toString());
+        //ord.setNewJSONValue("transport", tr.toString(), 0);
+
+        Log.v("Measurements", ord.getMeasurements());
+
+        // TODO: create new transport entry, get it's id and save it to 'transport' field in json
+
+        int res = DatabaseHandler.updateOrder(ord);       // UPDATE
+
     }
 
-    private JSONArray getAlertMessages(Integer id) {
+    private static JSONArray getAlertMessages(Integer id) {
         for (int i = 0; i < alerts.length(); i++) {
             try {
                 if (alerts.getJSONObject(i).getInt("id") == id) {
@@ -455,7 +452,7 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
         return null;
     }
 
-    private JSONObject addNewTransportObject(Integer id, JSONArray measurements, JSONArray alerts, long startTime, long endTime, int delivered) {
+    private static JSONObject addNewTransportObject(Integer id, JSONArray measurements, JSONArray alerts, long startTime, long endTime, int delivered) {
 
         // calculate duration in hours
         long duration = (endTime - startTime) / (60 * 60 * 1000) % 24;
@@ -475,6 +472,7 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
             tr.put("vehicleType", 0);
             tr.put("vehicleReg", "LJ-B672");
             tr.put("driverID", 1);
+            tr.put("driverName", "Goran Dragić");
             tr.put("text", "Customer was nice and friendly!");
 
         } catch (JSONException e) {
@@ -497,7 +495,9 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
                         .setSmallIcon(icon)
                         .setContentTitle(title)
                         .setContentText(text)
-                        .setAutoCancel(true);
+                        .setAutoCancel(true)
+                        .setStyle(new NotificationCompat.BigTextStyle()
+                                .bigText(text));
 
         // Creates an explicit intent for an Activity in your app
         Intent resultIntent = new Intent(this, MonitoringActivity.class);

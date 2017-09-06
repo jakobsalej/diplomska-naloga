@@ -110,7 +110,7 @@
                 android:text="Start"
                 android:layout_marginBottom="16dp" />
 
-            <TextView
+            <!--TextView
                 android:id="@+id/textView_last_update_time"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -125,7 +125,7 @@
                 android:layout_marginStart="56dp"
                 android:fontFamily="sans-serif"
                 android:text="Last update"
-                android:layout_marginBottom="16dp" />
+                android:layout_marginBottom="16dp" /!-->
 
             <TextView
                 android:id="@+id/textView_current_location"

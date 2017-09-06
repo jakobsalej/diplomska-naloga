@@ -73,7 +73,7 @@ public class TransportDetailsActivity extends AppCompatActivity implements Commo
         textViewDelivered = (TextView) findViewById(R.id.textView_delivered);
         textViewStarted = (TextView) findViewById(R.id.textView_time_started);
         textViewEnded = (TextView) findViewById(R.id.textView_time_ended);
-        textViewDuration = (TextView) findViewById(R.id.textView_time_duration);
+        //textViewDuration = (TextView) findViewById(R.id.textView_time_duration);
         textViewVehicle = (TextView) findViewById(R.id.textView_vehicle_info);
         textViewDriver = (TextView) findViewById(R.id.textView_driver_info);
         textViewComment = (TextView) findViewById(R.id.textView_comment);
@@ -114,7 +114,7 @@ public class TransportDetailsActivity extends AppCompatActivity implements Commo
             }
             String vehicleNo = obj.getString("vehicleReg");
             String vehicleData = vehicleNo + " (type: " + vehicle + ")";
-            String driverInfo = "Driver ID: " + obj.getInt("driverID") + " (you)";
+            String driverInfo = obj.getString("driverName") + " (ID: " + obj.getInt("driverID") + ")";
             String comment = obj.getString("text");
             setTextData(delivered, startDate, endDate, duration, vehicleData, driverInfo, comment);
 
@@ -258,7 +258,7 @@ public class TransportDetailsActivity extends AppCompatActivity implements Commo
         // time
         textViewStarted.setText(convertTime(startDate));
         textViewEnded.setText(convertTime(endDate));
-        textViewDuration.setText(String.valueOf(duration) + " h");
+        //textViewDuration.setText(String.valueOf(duration) + " h");
         textViewVehicle.setText(vehicleData);
         textViewDriver.setText(driverInfo);
         textViewComment.setText(comment);

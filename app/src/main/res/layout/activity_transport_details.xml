@@ -72,7 +72,7 @@
             android:text="Ended"
             android:layout_marginBottom="16dp" />
 
-        <TextView
+        <!--TextView
             android:id="@+id/textView_time_duration"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -86,7 +86,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="56dp"
             android:fontFamily="sans-serif"
-            android:text="Duration" />
+            android:text="Duration" /!-->
 
         <View
             style="@style/Divider"

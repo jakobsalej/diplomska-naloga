@@ -65,24 +65,27 @@ public class DisplayDataActivity extends AppCompatActivity {
             // check if we have Order document with this ID already
             OrderDocumentJSON od = DatabaseHandler.getOrder(Integer.parseInt(data));
             if (od != null) {
-                // we do have that doc already!
-                // get the same json as if we got it from server
-                data = od.getData();
-                addButton.setVisibility(View.GONE);
                 documentName.setText(data);
+
+                // we do have that doc already!
+                if (MonitorService.serviceRunning && od.getStatus() == 1) {
+                    // if service is running and we scanned an ID of order in progress, stop it
+                    stopMonitoring(od.getId());
+
+                } else {
+                    // get the same json as if we got it from server
+                    data = od.getData();
+                    addButton.setVisibility(View.GONE);
+
+                    // TODO: hide 'transport details button' if order is still active
+                }
+
             } else {
                 // get data from API if it's not a detail view
                 new GetDataFromDB().execute(BASE_URL + data);
             }
         }
     }
-
-
-    public void getDataFromDB(String id) {
-
-    }
-
-
 
 
     // TODO: optimize this (third party library? Volley, Retrofit)
@@ -225,48 +228,8 @@ public class DisplayDataActivity extends AppCompatActivity {
     }
 
 
-    public void stopMonitoring(View view) {
-        // stop the monitoring and get measurements
-        int endIndex = MonitorService.getMeasurementsLength();
-        String measurements = "";
-
-        // check if background service is even running
-        if (MonitorService.serviceRunning) {
-            JSONArray measurementsJSON = MonitorService.getMeasurements(startIndex, endIndex);
-            measurements = measurementsJSON.toString();
-            textViewMeasurements.setText(measurements);
-        }
-
-        // append measurements to JSON for server update
-        // TODO: add moar fields to 'transport' (dispozicija...)
-        String newData = null;
-        String newTransport = null;
-        try {
-            // create new 'transport' object and add measurements to it
-            JSONObject transport = new JSONObject();
-            transport.put("measurementsList", measurements);
-            newTransport = transport.toString();
-            // TODO: popup that asks if order was successfully delivered and option to add 'opombe'
-            // when user clicks 'DONE'
-
-            // add newly created object as a 'transport' field to existing OrderDocument object
-            JSONObject obj = new JSONObject(data);
-            obj.put("transport", transport);
-            newData = obj.toString();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-
-        // update local db (object)
-        if (od != null) {
-            od.setMeasurements(newTransport);
-            od.setData(newData);
-            Log.v("DISPLAYDATA", "Updating order! " + od.toString());
-        }
-
-        // update DB (local + server)
-        DatabaseHandler.updateOrder(od);
+    public void stopMonitoring(int id) {
+        MonitorService.saveMeasurements(id);
     }
 
 

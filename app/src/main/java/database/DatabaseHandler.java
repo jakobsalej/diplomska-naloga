@@ -22,7 +22,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     // app's database for storing data we want to retain during reopening
 
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 44;
+    public static final int DATABASE_VERSION = 49;
     public static final String DATABASE_NAME = "db";
     private static final String TAG = "DatabaseHandler";
 

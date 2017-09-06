@@ -66,7 +66,7 @@ import static com.example.jakob.qrreader.MonitorService.lastLon;
 import static com.example.jakob.qrreader.RecyclerAdapterCommonAlerts.convertTime;
 
 
-public class MonitoringActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, OnMapReadyCallback, AlertsFragment.OnFragmentInteractionListener {
+public class MonitoringActivity extends AppCompatActivity implements OnMapReadyCallback, AlertsFragment.OnFragmentInteractionListener {
 
     private static final String TAG = "MonitoringActivity";
     private static final int REQUEST_CHECK_SETTINGS = 1000;
@@ -80,10 +80,11 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
     private TextView status, timeRunning, startTime, lastUpdateTime, temp, humidity, pressure, lat, lng, location;
     private GoogleMap map;
     private ArrayList<OrderDocumentJSON> dbData;
+    private MonitoringActivity thisActiviy;
+
     private AlertsFragment fragment;
+    public static String appName;
 
-
-    private String appName;
     private long timerTime = 0;
     //runs without a timer by reposting this handler at the end of the runnable
     Handler timerHandler = new Handler();
@@ -107,7 +108,10 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_monitoring);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        toolbar.setVisibility(View.GONE);
+        //setSupportActionBar(toolbar);
+
+        thisActiviy = this;
 
         // get app name
         appName = getString(R.string.app_name);
@@ -118,8 +122,15 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
         humidity = (TextView) findViewById(R.id.textView_humidity_latest);
         timeRunning = (TextView) findViewById(R.id.textView_time_running);
         startTime = (TextView) findViewById(R.id.textView_start_time);
-        lastUpdateTime = (TextView) findViewById(R.id.textView_last_update_time);
+        //lastUpdateTime = (TextView) findViewById(R.id.textView_last_update_time);
         location = (TextView) findViewById(R.id.textView_current_location);
+
+
+        // start monitoring
+        final Intent i = new Intent(this, MonitorService.class);
+        startMonitoring(i, 0, null, 0);
+        showNotification();
+        //Snackbar.make(, "Monitor activity started!", Snackbar.LENGTH_LONG).setAction("Action", null).show();
 
         // timer
         if (MonitorService.serviceRunning) {
@@ -147,68 +158,22 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
 
         Log.v("ALERTS", String.valueOf(MonitorService.alerts.length()));
 
-
-        // WE DONT NEED THIS!! get data from DB -> get all active orders
-        // TODO: do this in background thread!
-        //int activeOrdersStatus = 1;
-        //dbData = DatabaseHandler.getOrders(activeOrdersStatus);
-
-
         // new service intent
-        final Intent i = new Intent(this, MonitorService.class);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setImageResource(R.drawable.ic_media_play_light);
+        fab.setImageResource(R.drawable.ic_stop_black_24px);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!serviceRunning) {
-                    startMonitoring(i, 0, null, timeDelta);
-                    serviceRunning = true;
-                    //status.setText("Running");
-                    showNotification();
-                    Snackbar.make(view, "Monitor activity started!", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                } else {
-                    stopService(i);
-                    cancelNotification(getApplicationContext(), notificationId);
-                    serviceRunning = false;
-                    //status.setText("Not Running");
-                    Snackbar.make(view, "Monitor activity stopped!", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                }
+                // open scanning activity
+                Intent intent = new Intent(thisActiviy, ReadQRActivity.class);
+                intent.putExtra("title", "Stop order monitoring");
+                intent.putExtra("text", "To stop monitoring, please scan order's QR code again or input document ID.");
+                startActivity(intent);
 
             }
         });
 
-        // last known location == current location
-        // Create an instance of GoogleAPIClient.
-
-        if (mGoogleApiClient == null) {
-            mGoogleApiClient = new GoogleApiClient.Builder(this)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .addApi(LocationServices.API)
-                    .build();
-        }
-
-
-
-    }
-
-
-    protected void onStart() {
-        super.onStart();
-        mGoogleApiClient.connect();
-        createLocationRequest();
-        //mapView.onStart();
-    }
-
-
-    protected void onStop() {
-        super.onStop();
-        mGoogleApiClient.disconnect();
-        //mapView.onStop();
     }
 
 
@@ -258,27 +223,6 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
     }
 
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        //mapView.onDestroy();
-    }
-
-
-    @Override
-    public void onLowMemory() {
-        super.onLowMemory();
-        //mapView.onLowMemory();
-    }
-
-
-    private void requestDataUpdate() {
-        // new service intent
-        final Intent i = new Intent(this, MonitorService.class);
-        startMonitoring(i, 1, "{data}", 10);
-    }
-
-
     // Define the callback for what to do when data is received
     private BroadcastReceiver monitorReceiver = new BroadcastReceiver() {
         @Override
@@ -297,14 +241,14 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
             double lastTemp = intent.getDoubleExtra("lastTemp", -1);
             double lastHumidity = intent.getDoubleExtra("lastHumidity", -1);
             double lastPressure = intent.getDoubleExtra("lastPressure", -1);
-            
+
             setLastValues(serviceRunning, lastTime, lastLat, lastLong, lastTemp, lastHumidity, lastPressure);
             fragment.updateFragmentData(null);
             Log.v(TAG, "Service running: " + serviceRunning);
         }
     };
 
-    
+
     private void setLastValues(boolean serviceRunning, String lastTime, double lastLat, double lastLong, double lastTemp, double lastHumidity, double lastPressure) {
         // TODO: also set service running??
         //startTime.setText(lastTime);
@@ -334,126 +278,15 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
     }
 
 
-    @Override
-    public void onConnected(Bundle connectionHint) {
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
-                mGoogleApiClient);
-        if (mLastLocation != null) {
-            Log.v(TAG, "Getting first location!");
-            Log.v(TAG, "Latitude: " + String.valueOf(mLastLocation.getLatitude()));
-            Log.v(TAG, "Longitude: " + String.valueOf(mLastLocation.getLongitude()));
-
-            // add phone location to map
-            // TODO: also add markers and set zoom
-            if (map != null) {
-                Log.v(TAG, "Setting current location");
-                map.setMyLocationEnabled(true);
-                map.getUiSettings().setMyLocationButtonEnabled(true);
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                        new LatLng(mLastLocation.getLatitude(),
-                                mLastLocation.getLongitude()), 7));
-
-            }
-        }
-
-        // get continous location updates
-        // LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-    }
-
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        Log.v(TAG, "Connection suspended");
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.v(TAG, "Connection failed");
-    }
-
-
-    // continous location updates
-    protected void createLocationRequest() {
-        mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(120000);    // TODO: set from 'location interval'
-        mLocationRequest.setFastestInterval(5000);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-
-        // add location request
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-                .addLocationRequest(mLocationRequest);
-
-        // check if user's location settings are enabled
-        PendingResult<LocationSettingsResult> result =
-                LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient,
-                        builder.build());
-
-        // prompt the user to change location settings
-        result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
-            @Override
-            public void onResult(LocationSettingsResult result) {
-                final Status status = result.getStatus();
-                final LocationSettingsStates states = result.getLocationSettingsStates();
-                switch (status.getStatusCode()) {
-                    case LocationSettingsStatusCodes.SUCCESS:
-                        // All location settings are satisfied. The client can
-                        // initialize location requests here.
-
-                        break;
-
-                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                        // Location settings are not satisfied, but this can be fixed
-                        // by showing the user a dialog.
-                        try {
-                            // Show the dialog by calling startResolutionForResult(),
-                            // and check the result in onActivityResult().
-                            // TODO: handle a case where user clicks 'cancel':
-                            // https://stackoverflow.com/questions/29801368/how-to-show-enable-location-dialog-like-google-maps/29872703#29872703
-                            status.startResolutionForResult(
-                                    MonitoringActivity.this,
-                                    REQUEST_CHECK_SETTINGS);
-                        } catch (IntentSender.SendIntentException e) {
-                            // Ignore the error.
-                        }
-                        break;
-
-                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                        // Location settings are not satisfied. However, we have no way
-                        // to fix the settings so we won't show the dialog.
-
-                        break;
-                }
-            }
-        });
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-        mLastLocation = location;
-        Log.v(TAG, "Getting new location!" + String.valueOf(location));
-        //mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
-    }
-
-
     public void showNotification() {
         NotificationCompat.Builder mBuilder =
                 (NotificationCompat.Builder) new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.cast_ic_notification_small_icon)
+                        .setSmallIcon(R.drawable.ic_assessment_black_24px)
                         .setContentTitle(appName)
                         .setContentText("Monitoring service is running!")
                         .setOngoing(true);
         // Creates an explicit intent for an Activity in your app
-        Intent resultIntent = new Intent(this, MonitoringActivity.class);
+        Intent resultIntent = new Intent(this, Main2Activity.class);
 
         // The stack builder object will contain an artificial back stack for the
         // started Activity.
@@ -461,7 +294,7 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
         // your application to the Home screen.
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
         // Adds the back stack for the Intent (but not the Intent itself)
-        stackBuilder.addParentStack(MonitoringActivity.class);
+        stackBuilder.addParentStack(Main2Activity.class);
         // Adds the Intent that starts the Activity to the top of the stack
         stackBuilder.addNextIntent(resultIntent);
         PendingIntent resultPendingIntent =
@@ -488,6 +321,17 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
     public void onMapReady(GoogleMap map) {
         LatLng lj = new LatLng(46.0569, 14.5058);
         map.moveCamera(CameraUpdateFactory.newLatLng(lj));
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        map.setMyLocationEnabled(true);
     }
 
 
@@ -500,8 +344,5 @@ public class MonitoringActivity extends AppCompatActivity implements GoogleApiCl
 
     @Override
     public void onFragmentInteraction(Uri uri) {
-
     }
 }
-
-
