@@ -69,8 +69,8 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="56dp"
             android:fontFamily="sans-serif"
-            android:text="Ended"
-            android:layout_marginBottom="16dp" />
+            android:text="Ended" />
+            <!--android:layout_marginBottom="16dp"!-->
 
         <!--TextView
             android:id="@+id/textView_time_duration"
@@ -87,6 +87,87 @@
             android:layout_marginStart="56dp"
             android:fontFamily="sans-serif"
             android:text="Duration" /!-->
+
+        <View
+            style="@style/Divider"
+            android:layout_marginStart="56dp"
+            android:layout_marginBottom="24dp"
+            android:layout_marginTop="24dp"/>
+
+        <TextView
+            android:id="@+id/textView_minTemp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+            android:text="Minimum temperature"
+            android:drawableLeft="@drawable/ic_trending_up_black_24px"
+            android:drawableTint="@color/colorPrimary"
+            android:drawablePadding="32dp"
+            android:gravity="center_vertical" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="56dp"
+            android:fontFamily="sans-serif"
+            android:text="Minimum temperature measured"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/textView_maxTemp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+            android:fontFamily="sans-serif"
+            android:text="Maximum temperature"
+            android:layout_marginStart="56dp"
+            android:drawablePadding="32dp"
+            android:gravity="center_vertical"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="56dp"
+            android:fontFamily="sans-serif"
+            android:text="Maximum temperature measured"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/textView_avgTemp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+            android:fontFamily="sans-serif"
+            android:text="Average temperature"
+            android:layout_marginStart="56dp"
+            android:drawablePadding="32dp"
+            android:gravity="center_vertical"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="56dp"
+            android:fontFamily="sans-serif"
+            android:text="Average temperature measured"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/textView_percentageTemp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+            android:fontFamily="sans-serif"
+            android:text="Percentage temperature"
+            android:layout_marginStart="56dp"
+            android:drawablePadding="32dp"
+            android:gravity="center_vertical"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="56dp"
+            android:fontFamily="sans-serif"
+            android:text="Temperature in recommended zone (% of time)" />
 
         <View
             style="@style/Divider"
@@ -203,7 +284,31 @@
             android:id="@+id/chart_second"
             android:layout_width="match_parent"
             android:layout_height="200dp"
-            android:layout_marginBottom="48dp" />
+            android:layout_marginBottom="36dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:text="MAP"
+            android:textColor="@color/colorPrimary"
+            android:drawableLeft="@drawable/ic_map_black_24px"
+            android:drawableTint="@color/colorPrimary"
+            android:fontFamily="sans-serif-condensed"
+            android:drawablePadding="32dp"
+            android:layout_marginBottom="16dp"
+            android:gravity="center_vertical"/>
+
+        <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:id="@+id/mapF"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="240dp"
+            android:layout_marginLeft="-16dp"
+            android:layout_marginRight="-16dp"
+            android:layout_marginBottom="36dp"
+            tools:context="com.example.jakob.qrreader.TransportDetailsActivity" />
 
         <TextView
             android:layout_width="match_parent"
@@ -218,16 +323,6 @@
             android:layout_marginBottom="24dp"
             android:gravity="center_vertical"/>
 
-        <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:tools="http://schemas.android.com/tools"
-            android:id="@+id/mapF"
-            android:name="com.google.android.gms.maps.SupportMapFragment"
-            android:layout_width="match_parent"
-            android:layout_height="240dp"
-            android:layout_marginLeft="-16dp"
-            android:layout_marginRight="-16dp"
-            android:layout_marginBottom="24dp"
-            tools:context="com.example.jakob.qrreader.TransportDetailsActivity" />
 
         <FrameLayout
             android:id="@+id/fragment_holder_alerts"

@@ -1,7 +1,9 @@
 package com.example.jakob.qrreader;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.net.Uri;
@@ -9,6 +11,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -49,6 +52,7 @@ import java.util.TimeZone;
 import database.DatabaseHandler;
 import database.OrderDocumentJSON;
 
+import static android.R.attr.dial;
 import static android.R.attr.order;
 
 
@@ -60,6 +64,7 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
     private GoogleMap mMap;
     private CollapsingToolbarLayout collapsingToolbarLayout;
     private ProgressDialog pd;
+    private AlertDialog dd;
     private TextView senderTextView, senderDetailTextView, receiverTextView, receiverDetailTextView,
     statusTextView, dateTextView, vehicleTextView, textTextView, tempRangeTextView;
     private String data;
@@ -114,7 +119,6 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
             measurementsData = intent.getStringExtra("measurements");
 
             setViewData(data);
-            setMeasuremntsViewData(measurementsData);
 
             // hide 'add' button - we already have it stored locally
             addBtn.setVisibility(View.GONE);
@@ -136,12 +140,10 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
                     od = DatabaseHandler.getOrder(Integer.parseInt(id));
                     Log.v("DB", "Saved transport data! " + od.getMeasurements());
                     measurementsData = od.getMeasurements();
-                    setMeasuremntsViewData(null);
                 }
 
                 // if we do, set view
                 setViewData(od.getData());
-                setMeasuremntsViewData(od.getMeasurements());
 
                 // hide 'add' button - we already have it stored locally
                 addBtn.setVisibility(View.GONE);
@@ -151,11 +153,6 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
                 new getDataFromDB().execute(BASE_URL + id);
             }
         }
-    }
-
-    private void setMeasuremntsViewData(String measurementsData) {
-        minTemp = 5;
-        maxTemp = 11;
     }
 
 
@@ -216,7 +213,6 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
 
             // date
             String date = obj.getString("date");
-            // TODO: parse date
             SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
             parser.setTimeZone(TimeZone.getTimeZone("GMT"));
             String formattedDate = null;
@@ -233,18 +229,15 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
             String text = obj.getString("text");
             textTextView.setText(text);
 
-            // temp range
-            // TODO: get from DB
-            double minT = 5;
-            double maxT = 11;
-            minTemp = minT;
-            maxTemp = maxT;
-            tempRangeTextView.setText(String.valueOf(minTemp) + " °C - " + String.valueOf(maxTemp) + " °C");
-
             // cargo
-            //JSONObject cargoObj = obj.getJSONObject("cargo");
-            //JSONArray cargoItems = cargoObj.getJSONArray("items");
-            JSONArray cargoItems = obj.getJSONArray("cargo");
+            JSONObject cargoObj = obj.getJSONObject("cargo");
+            JSONArray cargoItems = cargoObj.getJSONArray("items");
+            //JSONArray cargoItems = obj.getJSONArray("cargo");
+
+            // global cargo temps range
+            minTemp = cargoObj.getDouble("minTemp");
+            maxTemp = cargoObj.getDouble("maxTemp");
+            tempRangeTextView.setText(String.valueOf(minTemp) + " °C - " + String.valueOf(maxTemp) + " °C");
 
             // add cargo items fragment
             CommonItemFragment fragment = CommonItemFragment.newInstance("cargo", cargoItems.toString());
@@ -402,11 +395,35 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
 
-            // show gathered data
-            data = result;
-            setViewData(data);
-            if (pd.isShowing()){
-                pd.dismiss();
+            // if we get no data from server, show alert
+            if (result.length() < 10) {
+                Log.v("RES", "IN IF");
+                AlertDialog.Builder builder = new AlertDialog.Builder(OrderItemActivity.this);
+                builder.setMessage("No Order with such ID was found on server.")
+                        .setTitle("Item not found");
+
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // User clicked OK button
+                        // go to scan screen again
+                        if (pd.isShowing()){
+                            pd.dismiss();
+                        }
+                        scanCode();
+                    }
+                });
+
+                AlertDialog dialog = builder.create();
+                dialog.setCancelable(false);
+                dialog.show();
+
+            } else {
+                // show gathered data
+                data = result;
+                setViewData(data);
+                if (pd.isShowing()){
+                    pd.dismiss();
+                }
             }
         }
     }
@@ -444,8 +461,8 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
                     + obj.getJSONObject("startLocation").getString("y");
             String endLocation = obj.getJSONObject("endLocation").getString("x") + ","
                     + obj.getJSONObject("endLocation").getString("y");
-            double minTemp = 5;         // TODO: get it from DB
-            double maxTemp = 11;        // TODO: get it from DB
+            double minT = minTemp;      // values are already parsed from JSON
+            double maxT = maxTemp;
             int delivered = 0;          // when we add it, its not yet delivered
             String measurements = "measurements placeholder";
             OrderDocumentJSON  odj = new OrderDocumentJSON(
@@ -457,8 +474,8 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
                     date,
                     startLocation,
                     endLocation,
-                    minTemp,
-                    maxTemp,
+                    minT,
+                    maxT,
                     measurements,
                     startIndex,
                     endIndex
@@ -490,7 +507,6 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
 
 
     public void onAddClick(View v) {
-        //Snackbar.make(v, "Saving Order Document!", Snackbar.LENGTH_LONG).show();
         saveToDB(data);     // TODO: this should not be on main thread?
         Intent intent = new Intent(this, Main2Activity.class);
 
@@ -505,6 +521,13 @@ public class OrderItemActivity extends AppCompatActivity implements OnMapReadyCa
         intent.putExtra("transport", measurementsData);
         intent.putExtra("minTemp", minTemp);
         intent.putExtra("maxTemp", maxTemp);
+        startActivity(intent);
+    }
+
+
+    // add new document - open QR reader
+    public void scanCode() {
+        Intent intent = new Intent(this, ReadQRActivity.class);
         startActivity(intent);
     }
 }

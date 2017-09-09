@@ -24,6 +24,7 @@ import com.google.android.gms.maps.GoogleMapOptions;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -41,6 +42,7 @@ import java.util.List;
 import static android.R.attr.data;
 import static android.R.attr.entries;
 import static android.R.attr.fragment;
+import static android.R.attr.max;
 import static android.graphics.Color.rgb;
 import static android.os.Build.VERSION_CODES.N;
 
@@ -52,7 +54,8 @@ public class TransportDetailsActivity extends AppCompatActivity implements Commo
     private MapView mapView;
     private GoogleMap map;
     private TextView textViewDelivered, textViewStarted, textViewEnded, textViewDuration,
-            textViewVehicle, textViewDriver, textViewComment;
+            textViewVehicle, textViewDriver, textViewComment,
+            textViewMinTemp, textViewMaxTemp, textViewAvgTemp, textViewPercentageTemp;
     private JSONArray alertsArray;
     private String data;
 
@@ -77,6 +80,11 @@ public class TransportDetailsActivity extends AppCompatActivity implements Commo
         textViewVehicle = (TextView) findViewById(R.id.textView_vehicle_info);
         textViewDriver = (TextView) findViewById(R.id.textView_driver_info);
         textViewComment = (TextView) findViewById(R.id.textView_comment);
+        textViewMinTemp = (TextView) findViewById(R.id.textView_minTemp);
+        textViewMaxTemp = (TextView) findViewById(R.id.textView_maxTemp);
+        textViewAvgTemp = (TextView) findViewById(R.id.textView_avgTemp);
+        textViewPercentageTemp = (TextView) findViewById(R.id.textView_percentageTemp);
+
 
         // MAP
         GoogleMapOptions options = new GoogleMapOptions();
@@ -116,7 +124,14 @@ public class TransportDetailsActivity extends AppCompatActivity implements Commo
             String vehicleData = vehicleNo + " (type: " + vehicle + ")";
             String driverInfo = obj.getString("driverName") + " (ID: " + obj.getInt("driverID") + ")";
             String comment = obj.getString("text");
-            setTextData(delivered, startDate, endDate, duration, vehicleData, driverInfo, comment);
+
+            // temps
+            String minTemps = String.format("%.2f", obj.getDouble("minTemp")) + " °C";
+            String maxTemps = String.format("%.2f", obj.getDouble("maxTemp")) + " °C";
+            String avgTemps = String.format("%.2f", obj.getDouble("avgTemp")) + " °C";
+            String perTemps = String.format("%.2f", obj.getDouble("percentageTemp")) + "%";
+
+            setTextData(delivered, startDate, endDate, duration, vehicleData, driverInfo, comment, minTemps, maxTemps, avgTemps, perTemps);
 
             // get alerts
             alertsArray = obj.getJSONArray("alerts");
@@ -244,7 +259,7 @@ public class TransportDetailsActivity extends AppCompatActivity implements Commo
     }
 
 
-    private void setTextData(int delivered, long startDate, long endDate, long duration, String vehicleData, String driverInfo, String comment) {
+    private void setTextData(int delivered, long startDate, long endDate, long duration, String vehicleData, String driverInfo, String comment, String minTemps, String maxTemps, String avgTemps, String perTemps) {
 
         // delivered status
         if (delivered == 1) {
@@ -262,6 +277,12 @@ public class TransportDetailsActivity extends AppCompatActivity implements Commo
         textViewVehicle.setText(vehicleData);
         textViewDriver.setText(driverInfo);
         textViewComment.setText(comment);
+
+        // temps
+        textViewMinTemp.setText(minTemps);
+        textViewMaxTemp.setText(maxTemps);
+        textViewAvgTemp.setText(avgTemps);
+        textViewPercentageTemp.setText(perTemps);
     }
 
 
@@ -303,11 +324,30 @@ public class TransportDetailsActivity extends AppCompatActivity implements Commo
         try {
             JSONObject obj = new JSONObject(data);
             JSONArray alerts = obj.getJSONArray("alerts");
+            JSONArray measurements = obj.getJSONArray("measurements");
 
+            // add markers for every measurement
+            for (int i = 0; i < measurements.length(); i++) {
+                JSONObject m = measurements.getJSONObject(i);
+                JSONObject loc = m.getJSONObject("location");
+
+                LatLng position = new LatLng(loc.getDouble("x"), loc.getDouble("y"));
+                map.addMarker(new MarkerOptions()
+                        .position(position)
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+                        //.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_map_marker))
+                        .title("MEASUREMENT " + (i+1))
+                        .snippet("Temp: " + String.format("%.2f", m.getJSONObject("weather").getDouble("temperature")) +
+                        "\n Hum: " + String.format("%.2f", m.getJSONObject("weather").getDouble("humidity")))
+                );
+
+                builder.include(position);
+            }
+
+            // add markers for alerts
             for (int i = 0; i < alerts.length(); i++) {
                 JSONObject alert = alerts.getJSONObject(i);
                 JSONObject loc = alert.getJSONObject("location");
-                loc.getDouble("x");
 
                 LatLng position = new LatLng(loc.getDouble("x"), loc.getDouble("y"));
                 map.addMarker(new MarkerOptions()
@@ -319,9 +359,11 @@ public class TransportDetailsActivity extends AppCompatActivity implements Commo
                 builder.include(position);
             }
 
-            LatLngBounds bounds = builder.build();
-            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 300);
-            map.animateCamera(cameraUpdate);
+            if (alerts.length() > 0 || measurements.length() > 0) {
+                LatLngBounds bounds = builder.build();
+                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 300);
+                map.animateCamera(cameraUpdate);
+            }
 
         } catch (JSONException e) {
             e.printStackTrace();

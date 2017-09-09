@@ -5,7 +5,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -39,21 +38,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 
 import database.DatabaseHandler;
-import database.OrderDocument;
 import database.OrderDocumentJSON;
 
-import static android.R.attr.data;
-import static android.R.attr.logo;
-import static android.R.attr.order;
-import static android.R.attr.start;
 import static android.media.CamcorderProfile.get;
-import static database.DatabaseHandler.getOrders;
 
 
 /**
@@ -85,6 +75,11 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
     public static double lastPressure;
     public static double lastLat;
     public static double lastLon;
+    
+    public static double minRecTemp = 1000;
+    public static double maxRecTemp = -1000;
+    public static double sumRecTemp = 0;
+    
 
 
     public MonitorService() {
@@ -367,10 +362,31 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
 
     public static JSONArray getMeasurements(int startIndex, int endIndex) {
         // return subArray of measurements based on startIndex / endIndex
+
+        // reset values
+        minRecTemp = 1000;
+        maxRecTemp = -1000;
+        sumRecTemp = 0;
+
         JSONArray subArray = new JSONArray();
         for (int i = startIndex; i < endIndex; i ++) {
             try {
-                subArray.put(dataJSON.get(i));
+                JSONObject obj = (JSONObject) dataJSON.get(i);
+                subArray.put(obj);
+                
+                // get some stats
+                // min
+                double temp = obj.getJSONObject("weather").getDouble("temperature");
+                if (minRecTemp > temp) {
+                    minRecTemp = temp;
+                }
+                // max
+                if (maxRecTemp < temp) {
+                    maxRecTemp = temp;
+                }
+                // avg
+                sumRecTemp += temp;
+
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -404,7 +420,11 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
         OrderDocumentJSON ord = DatabaseHandler.getOrder(id);
         int startIndex = ord.getStartIndex();
         ord.setEndIndex(endIndex);
+
         JSONArray measurements = getMeasurements(startIndex, endIndex);
+        double minTemp = minRecTemp;
+        double maxTemp = maxRecTemp;
+        double avgTemp = sumRecTemp / measurements.length();
 
         // get startTime from the first measurement
         long startTime = 0;
@@ -423,11 +443,14 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
         // get alerts for this order
         JSONArray alertMsgs = getAlertMessages(ord.getId());
 
+        // calculate percentaage of time inside recommended temp zone
+        double percentageOfGoodTemp = 100 - (alertMsgs.length() / measurements.length() * 100);
+
         // TODO: set this somehow (was it successfully delivered?)
         int delivered = 1;
 
         // create new object transport
-        JSONObject tr = addNewTransportObject(ord.getId(), measurements, alertMsgs, startTime, endTime, delivered);
+        JSONObject tr = addNewTransportObject(ord.getId(), measurements, alertMsgs, startTime, endTime, delivered, minTemp, maxTemp, avgTemp, percentageOfGoodTemp);
         ord.setMeasurements(tr.toString());
         //ord.setNewJSONValue("transport", tr.toString(), 0);
 
@@ -452,7 +475,7 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
         return null;
     }
 
-    private static JSONObject addNewTransportObject(Integer id, JSONArray measurements, JSONArray alerts, long startTime, long endTime, int delivered) {
+    private static JSONObject addNewTransportObject(Integer id, JSONArray measurements, JSONArray alerts, long startTime, long endTime, int delivered, double minTemp, double maxTemp, double avgTemp, double percentageOfGoodTemp) {
 
         // calculate duration in hours
         long duration = (endTime - startTime) / (60 * 60 * 1000) % 24;
@@ -467,6 +490,10 @@ public class MonitorService extends IntentService implements GoogleApiClient.Con
             tr.put("endDate", endTime);
             tr.put("delivered", delivered);
             tr.put("duration", duration);
+            tr.put("minTemp", minTemp);
+            tr.put("maxTemp", maxTemp);
+            tr.put("avgTemp", avgTemp);
+            tr.put("percentageTemp", percentageOfGoodTemp);
 
             // TODO: get from settings
             tr.put("vehicleType", 0);
